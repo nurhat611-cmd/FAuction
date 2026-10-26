@@ -1,6 +1,6 @@
 # Language file of FAuction. "version" is managed by the plugin : leave it alone,
 # it is what lets your own texts be kept when new keys are added.
-version: 3
+version: 4
 fauction:
   help_description: "Affiche cette aide."
   auction_list_help_description: "Pour ouvrir l'hôtel des ventes"
@@ -12,6 +12,9 @@ fauction:
   clear_cache_help_description: "Pour vider le cache"
   migrate_help_description: "Faire une migration vers une autre version."
   clear_players_help_description: "Effacer les données d'enchères des joueurs et les compteurs sans commission"
+  slots_info_help_description: "Afficher les permissions d'emplacements et de conservation d'un joueur"
+  sounds_help_description: "Activer ou couper vos sons d'enchères"
+  lookup_help_description: "Voir les enchères d'un joueur"
   auction_search_help_description: "Rechercher un item"
 
   buy_auction_success: "Vous venez d'acheter l'item {item} pour le prix de {price}."
@@ -49,12 +52,25 @@ fauction:
   commission_paid: "Commission de l'hôtel des ventes prélevée : {fee} ({percent}%)."
   commission_free: "Mis en vente sans commission. Mises en vente gratuites restantes : {remaining}."
   commission_not_enough: "Vous n'avez pas assez d'argent pour payer la commission de {fee} ({percent}%)."
+  player_not_online: "Le joueur {player} n'est pas en ligne."
+  slots_info_header: "&6Emplacements d'enchères de {player} :"
+  slots_info_base: "&7Limite de base : &f{base}"
+  slots_info_bonus: "&7Bonus des permissions : &f+{extra} &8({permissions})"
+  slots_info_total: "&7Emplacements disponibles : &f{free}&7/&f{total} &8(lots actifs : {active})"
+  slots_info_storage: "&7Conservation des expirés : &f{days} jours &8(base {base} + bonus {bonus} : {permissions})"
+  sounds_on: "Les sons des enchères sont activés."
+  sounds_off: "Les sons des enchères sont coupés."
+  lookup_not_found: "&cLe joueur &6{player}&c n'a jamais joué ici."
+  lookup_empty: "&7{player} n'a rien en vente pour le moment."
+  sell_invalid_amount: "&cImpossible de vendre {amount} de cet objet : votre main n'en contient que {max}."
+  expire_reminder: "&eVous avez &6{count}&e objet(s) expiré(s) qui vous attendent : &6/ah expire"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:
     permission_denied: "&cVous n'avez pas la permission d'exécuter cette commande !"
     invalid_syntax: "&cSyntaxe invalide ! Usage : &6{command} {syntax}"
     not_allowed_on_console: "&cCette commande ne peut être utilisée que par un joueur."
+    unknown_material: "&cMatériau inconnu : &6{material}"
     must_be_a_number: "&6{num}&c doit être un nombre !"
     internal: "&cUne erreur est survenue lors de l'exécution de cette commande !"
     unknown_migrate_version: "&cVersion de migration inconnue : &6{version}&c. Versions disponibles : &6{versions}"

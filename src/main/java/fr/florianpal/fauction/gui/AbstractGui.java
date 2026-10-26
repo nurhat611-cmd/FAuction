@@ -209,6 +209,16 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
         e.setCancelled(true);
     }
 
+    /**
+     * The click of a gui press. Java clients never report which slot the mouse hovers, so this
+     * press sound is the closest a server can get to feedback on pointing at a button.
+     */
+    protected void playGuiClick() {
+        if (plugin.getSoundManager() != null) {
+            plugin.getSoundManager().playGuiClick(player);
+        }
+    }
+
     public boolean guiClick(InventoryClickEvent e) {
 
         Optional<BarrierWithCategory> auctionGuiBarrierOptional = abstractGuiConfig.getAuctionGuiBlocks().stream().filter(auctionGui -> e.getRawSlot() == auctionGui.getIndex()).findFirst();
@@ -216,6 +226,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
 
             FAuction.newChain(player).asyncFirst(auctionCommandManager::getAuctions).syncLast(auctions -> {
                 AuctionsGui gui = new AuctionsGui(plugin, player, auctions, 1, auctionGuiBarrierOptional.get().getCategory(), null);
+                playGuiClick();
                 gui.initialize();
             }).execute();
             return true;
@@ -226,6 +237,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
 
             FAuction.newChain(player).asyncFirst(() -> expireCommandManager.getExpires(player.getUniqueId())).syncLast(auctions -> {
                 ExpireGui gui = new ExpireGui(plugin, player, auctions, 1, expireGuiBarrierOptional.get().getCategory(), null);
+                playGuiClick();
                 gui.initialize();
             }).execute();
             return true;
@@ -234,6 +246,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
         boolean isClose = abstractGuiConfig.getCloseBlocks().stream().anyMatch(close -> e.getRawSlot() == close.getIndex());
         if (isClose) {
 
+            playGuiClick();
             player.closeInventory();
             return true;
         }
@@ -241,6 +254,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
         Optional<Barrier> commandBarrierOptional = abstractGuiConfig.getCommandBlocks().stream().filter(close -> e.getRawSlot() == close.getIndex()).findFirst();
         if (commandBarrierOptional.isPresent()) {
 
+            playGuiClick();
             Bukkit.dispatchCommand(plugin.getServer().getConsoleSender(), commandBarrierOptional.get().getValue());
             return true;
         }
@@ -250,6 +264,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
 
             FAuction.newChain(player).asyncFirst(() ->  auctionCommandManager.getAuctions(player.getUniqueId())).syncLast(auctions -> {
                 PlayerViewGui gui = new PlayerViewGui(plugin, player, auctions, 1, playerGuiBarrierOptional.get().getCategory(), null);
+                playGuiClick();
                 gui.initialize();
             }).execute();
             return true;
@@ -260,6 +275,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
 
             FAuction.newChain(player).asyncFirst(() -> historicCommandManager.getHistorics(player.getUniqueId())).syncLast(historics -> {
                 HistoricGui gui = new HistoricGui(plugin, player, ListUtil.historicToAuction(historics), 1, historicGuiBarrierOptional.get().getCategory(), null);
+                playGuiClick();
                 gui.initialize();
             }).execute();
             return true;
@@ -268,6 +284,7 @@ public abstract class AbstractGui implements InventoryHolder, Listener {
         Optional<BarrierMenu> menuGuiBarrierOptional = abstractGuiConfig.getMenuBlocks().stream().filter(p -> e.getRawSlot() == p.getIndex()).findFirst();
         if (menuGuiBarrierOptional.isPresent()) {
             MainGui gui = new MainGui(plugin, menuGuiBarrierOptional.get().getId(), player, 1);
+            playGuiClick();
             gui.initialize();
             return true;
         }

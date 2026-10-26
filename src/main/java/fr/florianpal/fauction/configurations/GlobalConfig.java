@@ -4,6 +4,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 import fr.florianpal.fauction.enums.CurrencyType;
 import fr.florianpal.fauction.enums.FreeQuotaMode;
 import fr.florianpal.fauction.enums.SpamAction;
+import fr.florianpal.fauction.objects.SoundSetting;
 import fr.florianpal.fauction.objects.SpamLimit;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -56,6 +57,8 @@ public class GlobalConfig {
     private int time;
     private int checkEvery;
 
+    private int expiredStorageDays = 3;
+
     private int timeCurrency;
     private int checkEveryCurrency;
 
@@ -83,6 +86,16 @@ public class GlobalConfig {
 
     private FreeQuotaMode commissionFreeQuotaMode = FreeQuotaMode.LIFETIME;
 
+    private SoundSetting sellSound = new SoundSetting("ENTITY_ITEM_PICKUP", 2.0, 1.0);
+
+    private SoundSetting expireClaimSound = new SoundSetting("ENTITY_PUFFER_FISH_BLOW_UP", 1.0, 1.0);
+
+    private SoundSetting buySound = new SoundSetting("ENTITY_VILLAGER_TRADE", 0.5, 1.0);
+
+    private String buyCustomSound = "custom.cashregister";
+
+    private SoundSetting guiClickSound = new SoundSetting("UI_BUTTON_CLICK", 0.5, 1.0);
+
     public void load(YamlDocument config) {
         lang = config.getString("lang");
 
@@ -106,6 +119,12 @@ public class GlobalConfig {
         commissionPercent = Double.isFinite(percent) ? Math.min(100, Math.max(0, percent)) : 7.0;
         commissionFreeQuotaMode = parseFreeQuotaMode(config.getString("commission.free-quota-mode", "LIFETIME"));
 
+        sellSound = readSound(config, "sounds.sell", sellSound);
+        expireClaimSound = readSound(config, "sounds.expireClaim", expireClaimSound);
+        buySound = readSound(config, "sounds.buy", buySound);
+        buyCustomSound = config.getString("sounds.buy.custom", buyCustomSound);
+        guiClickSound = readSound(config, "sounds.guiClick", guiClickSound);
+
         orderBy = config.getString("orderBy");
         dateFormat = config.getString("dateFormat");
         remainingDateFormat = config.getString("remainingDateFormat");
@@ -128,6 +147,9 @@ public class GlobalConfig {
         // fall back on a usable value.
         time = config.getInt("expiration.time", 3600);
         checkEvery = config.getInt("expiration.checkEvery", 72000);
+        // -1 keeps the historical behaviour (expired items are kept forever) for the servers
+        // that do not want a forgotten-items purge ; anything lower is read as -1.
+        expiredStorageDays = Math.max(-1, config.getInt("expiration.expiredStorageDays", 3));
         updateCacheEvery = config.getInt("cacheUpdate", 72000);
 
         timeCurrency = config.getInt("currencyCheck.time", 3600);
@@ -179,6 +201,26 @@ public class GlobalConfig {
      * starting : the worst a typo does is spend the quota the other way, and the value stays
      * visible in the file for the administrator to fix.
      */
+    /**
+     * One {@code sounds.<key>} section. A missing section keeps the default sound whole ; an
+     * unusable volume or pitch falls back on the default of that sound rather than reaching the
+     * client (a negative volume and a pitch of 9 are both accepted by the API and heard as
+     * garbage).
+     */
+    private static SoundSetting readSound(YamlDocument config, String path, SoundSetting fallback) {
+        String name = config.getString(path + ".name", fallback.name());
+        double volume = config.getDouble(path + ".volume", fallback.volume());
+        double pitch = config.getDouble(path + ".pitch", fallback.pitch());
+        if (!Double.isFinite(volume) || volume < 0) {
+            volume = fallback.volume();
+        }
+        if (!Double.isFinite(pitch)) {
+            pitch = fallback.pitch();
+        }
+        return new SoundSetting(name != null ? name : fallback.name(),
+                Math.min(10.0, volume), Math.min(2.0, Math.max(0.1, pitch)));
+    }
+
     private static FreeQuotaMode parseFreeQuotaMode(String value) {
         if (value != null) {
             try {

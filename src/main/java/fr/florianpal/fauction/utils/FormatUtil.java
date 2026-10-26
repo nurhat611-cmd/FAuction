@@ -4,7 +4,6 @@ import fr.florianpal.fauction.FAuction;
 import me.seetch.mlang.MLang;
 import me.seetch.mlang.TranslationKeyGenerator;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -19,21 +18,12 @@ import java.util.regex.Pattern;
 public class FormatUtil {
 
     /**
-     * Reads back what {@link #format(String)} produces : the section codes, and the
-     * {@code §x§R§R§G§G§B§B} form the hex colours are written in.
-     */
-    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.builder()
-            .character('\u00a7')
-            .hexColors()
-            .useUnusualXRepeatedCharacterHexFormat()
-            .build();
-
-    /**
-     * The same string as everywhere else in the plugin, as a component — what Cloud expects for the
-     * messages of the framework. Keeps a single formatting path for the whole plugin.
+     * A text of the plugin as a component — what Cloud expects for the messages of the
+     * framework. Read by {@link TextUtil}, so the legacy codes and MiniMessage keep meaning
+     * the same colours here as everywhere else.
      */
     public static Component component(String msg) {
-        return LEGACY.deserialize(msg);
+        return TextUtil.parse(msg);
     }
 
     /**
@@ -52,7 +42,32 @@ public class FormatUtil {
         }
     }
 
+    /**
+     * A tag {@link TextUtil} actually reads. {@code <price>} of the usage lines is not one, so
+     * those texts keep the historical path — and its exact spelling, trailing {@code §r} and
+     * all — while a text carrying a real tag goes through MiniMessage.
+     */
+    private static final Pattern MINI_MESSAGE_TAG = Pattern.compile(
+            "</?(black|dark_blue|dark_green|dark_aqua|dark_red|dark_purple|gold|gray|dark_gray|blue"
+                    + "|green|aqua|red|light_purple|yellow|white|bold|italic|underlined|strikethrough"
+                    + "|obfuscated|reset|gradient|rainbow|transition|newline|color|#[0-9a-fA-F]{6})(?=[>:\\s])",
+            Pattern.CASE_INSENSITIVE);
+
+    /**
+     * A text of the plugin as a legacy string — the form item names, lore and inventory titles
+     * still travel in. A text without a MiniMessage tag takes the historical path below
+     * untouched, byte for byte ; one that carries tags is read by {@link TextUtil} and spelled
+     * back in section codes, which is what lets a configuration write
+     * {@code <gradient:red:gold>} where it used to write {@code &c}.
+     */
     public static String format(String msg) {
+        if (msg != null && MINI_MESSAGE_TAG.matcher(msg).find()) {
+            return TextUtil.toLegacy(msg);
+        }
+        return legacyFormat(msg);
+    }
+
+    private static String legacyFormat(String msg) {
         Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
 
         Matcher match = pattern.matcher(msg);

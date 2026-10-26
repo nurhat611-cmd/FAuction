@@ -1,6 +1,6 @@
 # Language file of FAuction. "version" is managed by the plugin : leave it alone,
 # it is what lets your own texts be kept when new keys are added.
-version: 3
+version: 4
 fauction:
   help_description: "Показывает справку."
   auction_list_help_description: "Открыть аукцион"
@@ -13,6 +13,9 @@ fauction:
   auction_search_help_description: "Поиск предмета"
   migrate_help_description: "Мигрировать на другую версию."
   clear_players_help_description: "Очистить данные аукциона игроков и счётчики лотов без комиссии"
+  slots_info_help_description: "Показать права игрока на слоты и хранение просроченных товаров"
+  sounds_help_description: "Включить или выключить свои звуки аукциона"
+  lookup_help_description: "Посмотреть товары игрока на аукционе"
 
   buy_auction_success: "Вы успешно купили {item} за {price}."
   buy_auction_target_success: "Игрок {player} купил ваш предмет {item} за {price}."
@@ -48,12 +51,25 @@ fauction:
   commission_paid: "Списана комиссия аукциона: {fee} ({percent}%)."
   commission_free: "Лот выставлен без комиссии. Осталось лотов без комиссии: {remaining}."
   commission_not_enough: "У вас недостаточно денег для оплаты комиссии аукциона: {fee} ({percent}%)."
+  player_not_online: "Игрок {player} не в сети."
+  slots_info_header: "&6Слоты аукциона игрока {player}:"
+  slots_info_base: "&7Базовый лимит: &f{base}"
+  slots_info_bonus: "&7Бонус от прав: &f+{extra} &8({permissions})"
+  slots_info_total: "&7Доступно слотов: &f{free}&7/&f{total} &8(активных лотов: {active})"
+  slots_info_storage: "&7Хранение просроченных: &f{days} дн. &8(база {base} + бонус {bonus}: {permissions})"
+  sounds_on: "Звуки аукциона включены."
+  sounds_off: "Звуки аукциона выключены."
+  lookup_not_found: "&cИгрок &6{player}&c ещё не играл на сервере."
+  lookup_empty: "&7У игрока {player} сейчас нет товаров на аукционе."
+  sell_invalid_amount: "&cНельзя продать {amount} шт.: в руке только {max}."
+  expire_reminder: "&eУ вас &6{count}&e просроченных предметов: &6/ah expire"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:
     permission_denied: "&cИзвините, у Вас нет прав для выполнения этой команды."
     invalid_syntax: "&cИспользование: &6{command} {syntax}"
     not_allowed_on_console: "&cЭту команду может использовать только игрок."
+    unknown_material: "&cНеизвестный материал: &6{material}"
     must_be_a_number: "&6{num}&c должно быть числом."
     internal: "&cИзвините, но при выполнении команды произошла ошибка."
     unknown_migrate_version: "&cНеизвестная версия миграции: &6{version}&c. Доступные версии: &6{versions}"

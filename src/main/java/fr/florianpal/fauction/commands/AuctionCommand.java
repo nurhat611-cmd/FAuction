@@ -9,10 +9,12 @@ import fr.florianpal.fauction.gui.subGui.*;
 import fr.florianpal.fauction.languages.MessageKeys;
 import fr.florianpal.fauction.managers.ClaimManager;
 import fr.florianpal.fauction.managers.CommissionManager;
+import fr.florianpal.fauction.managers.ExpireStorageManager;
 import fr.florianpal.fauction.managers.SpamManager;
 import fr.florianpal.fauction.managers.commandmanagers.AuctionCommandManager;
 import fr.florianpal.fauction.managers.commandmanagers.ExpireCommandManager;
 import fr.florianpal.fauction.managers.commandmanagers.HistoricCommandManager;
+import fr.florianpal.fauction.managers.commandmanagers.LimitationManager;
 import fr.florianpal.fauction.objects.Auction;
 import fr.florianpal.fauction.objects.Category;
 import fr.florianpal.fauction.utils.CurrencyUtil;
@@ -22,6 +24,7 @@ import fr.florianpal.fauction.utils.MessageUtil;
 import fr.florianpal.fauction.utils.SerializationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.CommandSender;
@@ -40,8 +43,10 @@ import org.incendo.cloud.context.CommandInput;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.ceil;
@@ -81,6 +86,37 @@ public class AuctionCommand {
     static final String MIGRATE_VERSION_PARSER = "fauction:migrate_version";
 
     static final String MIGRATE_VERSION_SUGGESTIONS = "fauction:migrate_versions";
+
+    static final String ONLINE_PLAYER_SUGGESTIONS = "fauction:online_players";
+
+    static final String SOUND_STATE_SUGGESTIONS = "fauction:sound_states";
+
+    static final String PRICE_SUGGESTIONS = "fauction:prices";
+
+    static final String AMOUNT_SUGGESTIONS = "fauction:amounts";
+
+    static final String MATERIAL_PARSER = "fauction:material";
+
+    static final String MATERIAL_SUGGESTIONS = "fauction:materials";
+
+    /**
+     * The prices tab completion proposes for a sale. Starting points, not a cage : any other
+     * price stays typeable.
+     */
+    static final List<String> PRICE_SUGGESTION_VALUES = List.of("100", "1000", "25000", "50000", "100000", "500000");
+
+    /**
+     * The amounts tab completion proposes for a sale : one item, and the quantities stacks are
+     * usually traded in.
+     */
+    static final List<String> AMOUNT_SUGGESTION_VALUES = List.of("1", "16", "32", "64");
+
+    /**
+     * The names behind {@link #materialNames()}, built on first use. Not a static initializer :
+     * {@code Material} leans on the registries of a running server, and the class must stay
+     * loadable before one is up (the tests, for instance).
+     */
+    private static volatile List<String> materialNames;
 
     private final FAuction plugin;
 
@@ -178,7 +214,7 @@ public class AuctionCommand {
     @Command(ROOT + SPACE + SEARCH + SPACE + "<material>")
     @Permission("fauction.search")
     @CommandDescription("{@@fauction.auction_search_help_description}")
-    public void onSearch(Player playerSender, Material material) {
+    public void onSearch(Player playerSender, @Argument(value = "material", parserName = MATERIAL_PARSER) Material material) {
 
         if (spamManager.spamTest(playerSender, SpamAction.COMMAND)) {
             return;
@@ -196,10 +232,43 @@ public class AuctionCommand {
         }).execute();
     }
 
-    @Command(ROOT + SPACE + SELL + SPACE + "<priceEntry>")
+    @Command(ROOT + SPACE + "lookup <playerName>")
+    @Permission("fauction.lookup")
+    @CommandDescription("{@@fauction.lookup_help_description}")
+    public void onLookup(Player playerSender, @Argument(value = "playerName", suggestions = ONLINE_PLAYER_SUGGESTIONS) String playerName) {
+
+        if (spamManager.spamTest(playerSender, SpamAction.COMMAND)) {
+            return;
+        }
+
+        // Online first, then the user cache : looking a player up must never block the command
+        // thread on a Mojang query for a name the server has never seen.
+        Player onlineTarget = Bukkit.getPlayerExact(playerName);
+        OfflinePlayer target = onlineTarget != null ? onlineTarget : Bukkit.getOfflinePlayerIfCached(playerName);
+
+        if (target == null) {
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.LOOKUP_NOT_FOUND, "{player}", playerName);
+            return;
+        }
+
+        String targetName = target.getName() != null ? target.getName() : playerName;
+
+        FAuction.newChain(playerSender).asyncFirst(() -> auctionCommandManager.getAuctions(target.getUniqueId())).syncLast(auctions -> {
+            if (auctions.isEmpty()) {
+                MessageUtil.sendMessage(plugin, playerSender, MessageKeys.LOOKUP_EMPTY, "{player}", targetName);
+                return;
+            }
+
+            LookupGui lookupGui = new LookupGui(plugin, playerSender, target.getUniqueId(), auctions, 1, null, null);
+            lookupGui.initialize();
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.AUCTION_OPEN);
+        }).execute();
+    }
+
+    @Command(ROOT + SPACE + SELL + SPACE + "<priceEntry> [amount]")
     @Permission("fauction.sell")
     @CommandDescription("{@@fauction.auction_add_help_description}")
-    public void onAdd(Player playerSender, @Argument(value = "priceEntry", parserName = PRICE_PARSER) double priceEntry) {
+    public void onAdd(Player playerSender, @Argument(value = "priceEntry", parserName = PRICE_PARSER) double priceEntry, @Argument(value = "amount", suggestions = AMOUNT_SUGGESTIONS) Integer amount) {
 
         if (spamManager.spamTest(playerSender, SpamAction.TRANSACTION)) {
             return;
@@ -213,6 +282,20 @@ public class AuctionCommand {
         }
 
         ItemStack itemToSell = playerSender.getInventory().getItemInMainHand().clone();
+
+        // Without an amount the whole stack is sold, as the command has always done. With one,
+        // it has to be a quantity the hand really holds : the price is the price of the lot, so
+        // silently selling fewer items than typed would sell them at the wrong price.
+        int handAmount = itemToSell.getAmount();
+        int sellAmount = amount == null ? handAmount : amount;
+
+        if (sellAmount < 1 || sellAmount > handAmount) {
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SELL_INVALID_AMOUNT, "{amount}", String.valueOf(sellAmount), "{max}", String.valueOf(handAmount));
+            plugin.getClaimManager().release(playerSender.getUniqueId(), saleClaim);
+            return;
+        }
+
+        itemToSell.setAmount(sellAmount);
 
         double price = FormatUtil.applyMoneyFormat(priceEntry, df, globalConfig.isFeatureFlippingMoneyFormat());
 
@@ -231,12 +314,7 @@ public class AuctionCommand {
 
             List<Auction> auctions = sellData.auctions();
 
-            int limitations;
-            if (plugin.getConfigurationManager().getGlobalConfig().isLimitationsUseMetaLuckperms()) {
-                limitations = plugin.getLimitationManager().getAuctionLimitationByMeta(playerSender);
-            } else {
-                limitations = plugin.getLimitationManager().getAuctionLimitationByConfig(playerSender);
-            }
+            int limitations = plugin.getLimitationManager().getAuctionLimitation(playerSender);
 
 
             if (limitations != -1 && limitations <= auctions.size()) {
@@ -246,7 +324,7 @@ public class AuctionCommand {
 
             // The hand may have changed during the round trip, only the checked item can be sold.
             ItemStack inHand = playerSender.getInventory().getItemInMainHand();
-            if (!inHand.isSimilar(itemToSell) || inHand.getAmount() != itemToSell.getAmount()) {
+            if (!inHand.isSimilar(itemToSell) || inHand.getAmount() != handAmount) {
                 return;
             }
 
@@ -281,8 +359,12 @@ public class AuctionCommand {
             }
 
             // Taken and resynchronised right away, so the client cannot keep a ghost item and send
-            // it back to the server.
-            playerSender.getInventory().setItemInMainHand(null);
+            // it back to the server. A partial sale only draws the sold amount from the stack.
+            if (sellAmount >= inHand.getAmount()) {
+                playerSender.getInventory().setItemInMainHand(null);
+            } else {
+                inHand.setAmount(inHand.getAmount() - sellAmount);
+            }
             playerSender.updateInventory();
             itemTaken.set(true);
 
@@ -325,6 +407,8 @@ public class AuctionCommand {
                 } else if (feePaid.get()) {
                     MessageUtil.sendMessage(plugin, playerSender, MessageKeys.COMMISSION_PAID, "{fee}", df.format(feeToPay), "{percent}", df.format(commissionManager.getPercent()));
                 }
+
+                plugin.getSoundManager().playSell(playerSender);
             }, added -> {
 
                 // Same reason as above : the hash must not survive the round trip, and it is no
@@ -488,6 +572,40 @@ public class AuctionCommand {
         return true;
     }
 
+    @Command(ROOT + SPACE + "sounds")
+    @Permission("fauction.sounds")
+    @CommandDescription("{@@fauction.sounds_help_description}")
+    public void onSoundsStatus(Player playerSender) {
+        MessageUtil.sendMessage(plugin, playerSender,
+                plugin.getSoundManager().isSoundsEnabled(playerSender) ? MessageKeys.SOUNDS_ON : MessageKeys.SOUNDS_OFF);
+    }
+
+    @Command(ROOT + SPACE + "sounds <state>")
+    @Permission("fauction.sounds")
+    @CommandDescription("{@@fauction.sounds_help_description}")
+    public void onSounds(Player playerSender, @Argument(value = "state", suggestions = SOUND_STATE_SUGGESTIONS) String state) {
+
+        Boolean enabled = switch (state.toLowerCase(Locale.ROOT)) {
+            case "on", "true", "enable", "enabled" -> Boolean.TRUE;
+            case "off", "false", "disable", "disabled" -> Boolean.FALSE;
+            default -> null;
+        };
+
+        // An unknown state changes nothing and simply reports where the switch stands.
+        if (enabled == null) {
+            onSoundsStatus(playerSender);
+            return;
+        }
+
+        plugin.getSoundManager().setSoundsEnabled(playerSender, enabled);
+        MessageUtil.sendMessage(plugin, playerSender, enabled ? MessageKeys.SOUNDS_ON : MessageKeys.SOUNDS_OFF);
+    }
+
+    @Suggestions(SOUND_STATE_SUGGESTIONS)
+    public List<String> soundStateSuggestions() {
+        return List.of("on", "off");
+    }
+
     @Command(ROOT + SPACE + EXPIRE)
     @Permission("fauction.expire")
     @CommandDescription("{@@fauction.expire_add_help_description}")
@@ -559,6 +677,55 @@ public class AuctionCommand {
         }).execute();
     }
 
+    @Command(ROOT + SPACE + ADMIN + SPACE + "slots <playerName>")
+    @Permission("fauction.admin.slots")
+    @CommandDescription("{@@fauction.slots_info_help_description}")
+    public void onAdminSlots(Player playerSender, @Argument(value = "playerName", suggestions = ONLINE_PLAYER_SUGGESTIONS) String playerName) {
+
+        Player target = Bukkit.getPlayerExact(playerName);
+        if (target == null) {
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.PLAYER_NOT_ONLINE, "{player}", playerName);
+            return;
+        }
+
+        FAuction.newChain(playerSender).asyncFirst(() -> auctionCommandManager.getAuctions(target.getUniqueId()).size()).syncLast(active -> {
+            int baseLimit = plugin.getLimitationManager().getBaseAuctionLimitation(target);
+            int extraSlots = plugin.getLimitationManager().getExtraSlots(target);
+            int totalLimit = plugin.getLimitationManager().getAuctionLimitation(target);
+            String totalText = totalLimit < 0 ? "∞" : String.valueOf(totalLimit);
+            String freeText = totalLimit < 0 ? "∞" : String.valueOf(Math.max(0, totalLimit - active));
+
+            int baseStorageDays = plugin.getExpireStorageManager().getBaseStorageDays();
+            int storageBonusDays = plugin.getExpireStorageManager().getBonusDays(target);
+            String storageDaysText = baseStorageDays < 0 ? "∞" : String.valueOf(baseStorageDays + storageBonusDays);
+
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_HEADER, "{player}", target.getName());
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_BASE, "{base}", String.valueOf(baseLimit));
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_BONUS, "{extra}", String.valueOf(extraSlots), "{permissions}", heldPermissions(target, LimitationManager.EXTRA_SLOT_PERMISSION_PREFIX));
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_TOTAL, "{free}", freeText, "{total}", totalText, "{active}", String.valueOf(active));
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_STORAGE, "{days}", storageDaysText, "{base}", String.valueOf(baseStorageDays), "{bonus}", String.valueOf(storageBonusDays), "{permissions}", heldPermissions(target, ExpireStorageManager.PERMISSION_PREFIX));
+        }).execute();
+    }
+
+    /**
+     * The {@code <prefix>1 .. <prefix>10} permissions of the series the player actually holds,
+     * "-" when they hold none : what the administrator needs to see to understand a bonus.
+     */
+    private String heldPermissions(Player target, String prefix) {
+        List<String> held = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            if (target.hasPermission(prefix + i)) {
+                held.add(prefix + i);
+            }
+        }
+        return held.isEmpty() ? "-" : String.join(", ", held);
+    }
+
+    @Suggestions(ONLINE_PLAYER_SUGGESTIONS)
+    public List<String> onlinePlayerSuggestions() {
+        return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+    }
+
     // Two spellings, one wipe : "clear data players" is the form asked for when a season ends,
     // "admin purge players" keeps it next to the other purges. The words are literals, like
     // "purge all" : only the root (and the admin branch) can be renamed in config.yml.
@@ -617,7 +784,7 @@ public class AuctionCommand {
      * back unchanged when it cannot parse it. {@code Infinity} only ever hit a maximum price when one
      * happened to be configured. Neither can reach the business code any more.
      */
-    @Parser(name = PRICE_PARSER)
+    @Parser(name = PRICE_PARSER, suggestions = PRICE_SUGGESTIONS)
     public double parsePrice(CommandInput input) {
         String token = input.readString();
 
@@ -652,6 +819,102 @@ public class AuctionCommand {
     @Suggestions(MIGRATE_VERSION_SUGGESTIONS)
     public List<String> migrateVersionSuggestions() {
         return MigrateVersion.ids();
+    }
+
+    @Suggestions(PRICE_SUGGESTIONS)
+    public List<String> priceSuggestions() {
+        return PRICE_SUGGESTION_VALUES;
+    }
+
+    @Suggestions(AMOUNT_SUGGESTIONS)
+    public List<String> amountSuggestions() {
+        return AMOUNT_SUGGESTION_VALUES;
+    }
+
+    /**
+     * The material of a search, read the way players type it : any case, with or without the
+     * {@code minecraft:} namespace. The parser Cloud registers by default wants the exact name
+     * of the enum, so {@code /ah search diamond_sword} failed where {@code DIAMOND_SWORD}
+     * worked — and Minecraft players type items in lowercase everywhere else.
+     */
+    @Parser(name = MATERIAL_PARSER, suggestions = MATERIAL_SUGGESTIONS)
+    public Material parseMaterial(CommandInput input) {
+        String token = input.readString();
+        return parseMaterialName(token).orElseThrow(() -> new UnknownMaterialException(token));
+    }
+
+    static Optional<Material> parseMaterialName(String raw) {
+        if (raw == null) {
+            return Optional.empty();
+        }
+
+        String name = raw.trim().toLowerCase(Locale.ROOT);
+        if (name.startsWith("minecraft:")) {
+            name = name.substring("minecraft:".length());
+        }
+        name = name.replace(' ', '_').replace('-', '_');
+        if (name.isEmpty()) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(Material.valueOf(name.toUpperCase(Locale.ROOT)));
+        } catch (IllegalArgumentException unknownEnumName) {
+            return Optional.ofNullable(Material.matchMaterial(name));
+        }
+    }
+
+    /**
+     * The materials still matching what the player has typed. Left to itself, the completion
+     * proposes every material of the game and filters them on a case-sensitive prefix ;
+     * narrowing the list here is what makes {@code dia} — or {@code DIA} — land on the handful
+     * of materials the player is actually aiming at.
+     */
+    @Suggestions(MATERIAL_SUGGESTIONS)
+    public List<String> materialSuggestions(CommandInput input) {
+        String remaining = input.remainingInput();
+        return materialSuggestionsFor(remaining.substring(remaining.lastIndexOf(' ') + 1));
+    }
+
+    /**
+     * Every material there is under the lowercase name players type, minus the airs and the
+     * legacy aliases : the names the suggestions of {@code /ah search} narrow on what is
+     * typed. Names only, deliberately — asking each material whether it is an item would go
+     * through the server registries, and a suggestion has no business depending on them.
+     */
+    static List<String> materialNames() {
+        List<String> names = materialNames;
+        if (names == null) {
+            names = Arrays.stream(Material.values())
+                    .map(material -> material.name().toLowerCase(Locale.ROOT))
+                    .filter(name -> !name.equals("air") && !name.endsWith("_air") && !name.startsWith("legacy_"))
+                    .sorted()
+                    .toList();
+            materialNames = names;
+        }
+        return names;
+    }
+
+    static List<String> materialSuggestionsFor(String typed) {
+        String fragment = typed == null ? "" : typed.trim().toLowerCase(Locale.ROOT);
+        if (fragment.startsWith("minecraft:")) {
+            fragment = fragment.substring("minecraft:".length());
+        }
+        fragment = fragment.replace('-', '_');
+
+        // Prefix matches first — what the player is most likely typing — then the names merely
+        // containing the fragment, for the {@code sword} typed in search of every sword.
+        List<String> byPrefix = new ArrayList<>();
+        List<String> byFragment = new ArrayList<>();
+        for (String materialName : materialNames()) {
+            if (materialName.startsWith(fragment)) {
+                byPrefix.add(materialName);
+            } else if (materialName.contains(fragment)) {
+                byFragment.add(materialName);
+            }
+        }
+        byPrefix.addAll(byFragment);
+        return byPrefix;
     }
 
     /**
@@ -695,6 +958,20 @@ public class AuctionCommand {
 
         UnknownMigrateVersionException(String input) {
             super("Unknown migration version : " + input);
+            this.input = input;
+        }
+
+        public String getInput() {
+            return input;
+        }
+    }
+
+    public static final class UnknownMaterialException extends IllegalArgumentException {
+
+        private final transient String input;
+
+        UnknownMaterialException(String input) {
+            super("Unknown material : " + input);
             this.input = input;
         }
 

@@ -40,8 +40,13 @@ class GlobalConfigTest {
         assertFalse(config.isFeatureDuplicationHashCodeControl());
         assertEquals(5, config.getLimitations().get("default"));
         assertTrue(config.isCommissionEnabled());
+        assertEquals(3, config.getExpiredStorageDays());
         assertEquals(7.0, config.getCommissionPercent());
         assertEquals(FreeQuotaMode.LIFETIME, config.getCommissionFreeQuotaMode());
+        assertEquals("ENTITY_ITEM_PICKUP", config.getSellSound().name());
+        assertEquals(2.0, config.getSellSound().volume());
+        assertEquals("custom.cashregister", config.getBuyCustomSound());
+        assertEquals("UI_BUTTON_CLICK", config.getGuiClickSound().name());
     }
 
     @Test
@@ -66,6 +71,7 @@ class GlobalConfigTest {
                 expiration:
                   time: 60
                   checkEvery: 1200
+                  expiredStorageDays: 9
                 limitations:
                   default: 5
                   vip: 20
@@ -79,6 +85,7 @@ class GlobalConfigTest {
         assertEquals(1200, config.getUpdateCacheEvery());
         assertEquals(60, config.getTime());
         assertEquals(1200, config.getCheckEvery());
+        assertEquals(9, config.getExpiredStorageDays());
         assertFalse(config.isFeatureFlippingExpiration());
         assertTrue(config.isFeatureFlippingMoneyFormat());
         assertTrue(config.isFeatureDuplicationHashCodeControl());
@@ -146,6 +153,38 @@ class GlobalConfigTest {
 
         assertEquals(0.0, config.getCommissionPercent());
         assertEquals(FreeQuotaMode.LIFETIME, config.getCommissionFreeQuotaMode());
+    }
+
+    @Test
+    @DisplayName("The sounds section is read and its numbers are kept playable")
+    void soundsSectionIsRead() {
+
+        GlobalConfig config = new GlobalConfig();
+        config.load(TestConfigs.of("""
+                lang: "en"
+                limitations:
+                  default: 5
+                sounds:
+                  sell:
+                    name: "ENTITY_EXPERIENCE_ORB_PICKUP"
+                    volume: 1.5
+                    pitch: 9
+                  buy:
+                    custom: ""
+                    name: "ENTITY_PLAYER_LEVELUP"
+                    volume: 0.25
+                    pitch: 0.8
+                """));
+
+        assertEquals("ENTITY_EXPERIENCE_ORB_PICKUP", config.getSellSound().name());
+        assertEquals(1.5, config.getSellSound().volume());
+        assertEquals(2.0, config.getSellSound().pitch());
+        assertEquals("", config.getBuyCustomSound());
+        assertEquals("ENTITY_PLAYER_LEVELUP", config.getBuySound().name());
+        assertEquals(0.25, config.getBuySound().volume());
+        assertEquals(0.8, config.getBuySound().pitch());
+        // A section left out keeps its default whole.
+        assertEquals("ENTITY_PUFFER_FISH_BLOW_UP", config.getExpireClaimSound().name());
     }
 
     @Test

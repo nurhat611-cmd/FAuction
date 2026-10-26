@@ -1,0 +1,138 @@
+=====================================================================
+ FAuction — все разрешения (permissions) для LuckPerms
+ Сгенерировано из plugin.yml (шаги 1-5). Узлы чувствительны к регистру
+ там, где он указан: FAuction_dubleSlot_* и FAuction_expireDay_* —
+ именно так, с большой FA и "duble" без "o".
+=====================================================================
+
+БЫСТРЫЙ СТАРТ (консоль или игрок с правами LuckPerms):
+  Игрокам:        lp group default permission set fauction.user true
+  Администрации: lp group admin   permission set fauction.admin true
+  Пример личной выдачи:
+                  lp user Steve permission set fauction.nocommission.10 true
+                  lp user Steve permission set FAuction_dubleSlot_3 true
+  Проверить, что получилось у игрока: /ah admin slots <ник>
+
+---------------------------------------------------------------------
+ 1. ИГРОКИ (по умолчанию true — выдавать не нужно, можно отбирать)
+---------------------------------------------------------------------
+fauction.user                [true (у всех)]  Родительский узел игрока: включает list, sell, expire, search, sounds, lookup
+fauction.list                [true (у всех)]  Открывать аукцион (/ah и /ah list)
+fauction.sell                [true (у всех)]  Выставлять предметы (/ah sell <цена> [количество])
+fauction.expire              [true (у всех)]  Забирать просроченные предметы (/ah expire)
+fauction.search              [true (у всех)]  Поиск по материалу (/ah search <материал>), регистр не важен
+fauction.sounds              [true (у всех)]  Включать/выключать свои звуки аукциона (/ah sounds on|off)
+fauction.lookup              [true (у всех)]  Смотреть лоты игрока (/ah lookup <ник>)
+
+---------------------------------------------------------------------
+ 2. ГИЛЬДИЯ ТОРГОВЦЕВ (по умолчанию false — выдаются рангам/донату)
+---------------------------------------------------------------------
+
+Бесплатные лоты без комиссии 7% (НЕ суммируются: берётся МАКСИМУМ):
+fauction.nocommission.3      [false (никому)]  3 лотов без комиссии (режим квоты: commission.free-quota-mode)
+fauction.nocommission.5      [false (никому)]  5 лотов без комиссии (режим квоты: commission.free-quota-mode)
+fauction.nocommission.7      [false (никому)]  7 лотов без комиссии (режим квоты: commission.free-quota-mode)
+fauction.nocommission.10     [false (никому)]  10 лотов без комиссии (режим квоты: commission.free-quota-mode)
+fauction.nocommission.16     [false (никому)]  16 лотов без комиссии (режим квоты: commission.free-quota-mode)
+fauction.nocommission.25     [false (никому)]  25 лотов без комиссии (режим квоты: commission.free-quota-mode)
+
+Дополнительные слоты на витрине (СУММИРУЮТСЯ друг с другом и с лимитом ранга):
+FAuction_dubleSlot_1         [false (никому)]  +1 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_2         [false (никому)]  +2 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_3         [false (никому)]  +3 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_4         [false (никому)]  +4 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_5         [false (никому)]  +5 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_6         [false (никому)]  +6 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_7         [false (никому)]  +7 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_8         [false (никому)]  +8 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_9         [false (никому)]  +9 слот(а) к лимиту активных лотов
+FAuction_dubleSlot_10        [false (никому)]  +10 слот(а) к лимиту активных лотов
+
+Дополнительные дни хранения просроченных (СУММИРУЮТСЯ; база: expiration.expiredStorageDays = 3):
+FAuction_expireDay_1         [false (никому)]  +1 дн. к хранению просроченных предметов
+FAuction_expireDay_2         [false (никому)]  +2 дн. к хранению просроченных предметов
+FAuction_expireDay_3         [false (никому)]  +3 дн. к хранению просроченных предметов
+FAuction_expireDay_4         [false (никому)]  +4 дн. к хранению просроченных предметов
+FAuction_expireDay_5         [false (никому)]  +5 дн. к хранению просроченных предметов
+FAuction_expireDay_6         [false (никому)]  +6 дн. к хранению просроченных предметов
+FAuction_expireDay_7         [false (никому)]  +7 дн. к хранению просроченных предметов
+FAuction_expireDay_8         [false (никому)]  +8 дн. к хранению просроченных предметов
+FAuction_expireDay_9         [false (никому)]  +9 дн. к хранению просроченных предметов
+FAuction_expireDay_10        [false (никому)]  +10 дн. к хранению просроченных предметов
+
+---------------------------------------------------------------------
+ 3. АДМИНИСТРАЦИЯ И МОДЕРАЦИЯ (по умолчанию op)
+---------------------------------------------------------------------
+fauction.admin                         [op]  Родительский узел администрации: все fauction.admin.* и fauction.tabcomplete
+fauction.tabcomplete                   [op]  Видеть слова list и expire в таб-подсказках /ah (запускать их могут все)
+fauction.mod.cancel                    [op]  Модератор: шифт+ПКМ по чужому лоту снимает его в просроченные владельца
+fauction.bypass.spam                   [op]  Игнорировать антиспам-ограничения аукциона
+fauction.admin.reload                  [op]  /ah admin reload — перезагрузка конфигурации
+fauction.admin.slots                   [op]  /ah admin slots <игрок> — слоты и сроки хранения игрока
+fauction.admin.clear.players           [op]  /ah clear data players (= /ah admin purge players) — вайп: лоты, просроченные, история и счётчики бесплатных лотов
+fauction.admin.purge.all               [op]  /ah admin purge all — очистить всё (счётчики бесплатных лотов НЕ сбрасывает)
+fauction.admin.purge.auction           [op]  /ah admin purge auction — очистить активные лоты
+fauction.admin.purge.expire            [op]  /ah admin purge expire — очистить просроченные
+fauction.admin.purge.hictoric          [op]  /ah admin purge historic — очистить историю (опечатка hictoric — историческая, так в плагине)
+fauction.admin.migrate                 [op]  /ah admin migrate <версия> — миграция данных старых версий
+fauction.admin.transfertBddToPaper     [op]  /ah admin transfertToPaper / transfertToBukkit — конвертация БД
+
+---------------------------------------------------------------------
+ 4. ПОЛНЫЙ СПИСОК УЗЛОВ plugin.yml (для сверки)
+---------------------------------------------------------------------
+fauction.user                          [true (у всех)]  Parent, grants every player permission
+fauction.list                          [true (у всех)]  Open the auction gui
+fauction.sell                          [true (у всех)]  Sell an item on the auction house
+fauction.expire                        [true (у всех)]  Open the expired items gui
+fauction.search                        [true (у всех)]  Search the auctions by material
+fauction.sounds                        [true (у всех)]  Turn your own auction sounds on or off (/ah sounds on|off)
+fauction.lookup                        [true (у всех)]  View the auctions of a player (/ah lookup <player>)
+fauction.tabcomplete                   [op]  See the list and expire words in the /ah tab completion (everyone can still run them)
+fauction.bypass.spam                   [op]  Ignore the anti packet spamming protection
+fauction.mod.cancel                    [op]  Cancel the auction of another player
+fauction.admin                         [op]  Parent, grants every administration permission
+fauction.admin.reload                  [op]  Reload the configuration
+fauction.admin.purge.all               [op]  Purge every data
+fauction.admin.purge.auction           [op]  Purge the active auctions
+fauction.admin.purge.expire            [op]  Purge the expired items
+fauction.admin.purge.hictoric          [op]  Purge the transaction history
+fauction.admin.transfertBddToPaper     [op]  Migrate the serialization format of the database
+fauction.admin.migrate                 [op]  Run the migration of a given version
+fauction.admin.clear.players           [op]  Wipe the player auction data and the free-commission counters (/ah clear data players)
+fauction.nocommission.3                [false (никому)]  List 3 lots without the auction commission (highest held tier wins, see commission in config.yml)
+fauction.nocommission.5                [false (никому)]  List 5 lots without the auction commission (highest held tier wins, see commission in config.yml)
+fauction.nocommission.7                [false (никому)]  List 7 lots without the auction commission (highest held tier wins, see commission in config.yml)
+fauction.nocommission.10               [false (никому)]  List 10 lots without the auction commission (highest held tier wins, see commission in config.yml)
+fauction.nocommission.16               [false (никому)]  List 16 lots without the auction commission (highest held tier wins, see commission in config.yml)
+fauction.nocommission.25               [false (никому)]  List 25 lots without the auction commission (highest held tier wins, see commission in config.yml)
+fauction.admin.slots                   [op]  Show the slot and expired-storage permissions of a player (/ah admin slots <player>)
+FAuction_dubleSlot_1                   [false (никому)]  1 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_2                   [false (никому)]  2 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_3                   [false (никому)]  3 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_4                   [false (никому)]  4 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_5                   [false (никому)]  5 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_6                   [false (никому)]  6 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_7                   [false (никому)]  7 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_8                   [false (никому)]  8 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_9                   [false (никому)]  9 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_dubleSlot_10                  [false (никому)]  10 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+FAuction_expireDay_1                   [false (никому)]  Keep expired items in /ah expire 1 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_2                   [false (никому)]  Keep expired items in /ah expire 2 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_3                   [false (никому)]  Keep expired items in /ah expire 3 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_4                   [false (никому)]  Keep expired items in /ah expire 4 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_5                   [false (никому)]  Keep expired items in /ah expire 5 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_6                   [false (никому)]  Keep expired items in /ah expire 6 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_7                   [false (никому)]  Keep expired items in /ah expire 7 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_8                   [false (никому)]  Keep expired items in /ah expire 8 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_9                   [false (никому)]  Keep expired items in /ah expire 9 extra day(s) (the FAuction_expireDay_* permissions stack together)
+FAuction_expireDay_10                  [false (никому)]  Keep expired items in /ah expire 10 extra day(s) (the FAuction_expireDay_* permissions stack together)
+
+=====================================================================
+ Примечания
+ - Переименование команд в config.yml (секция commands) разрешения НЕ
+   двигает: sell под любым именем остаётся fauction.sell.
+ - /ah expire и /ah list обычному игроку в подсказках не предлагаются
+   (их видят держатели fauction.tabcomplete), но запускаются как раньше.
+ - Родительские узлы: fauction.user и fauction.admin — удобнее всего
+   вешать на группы, отдельные узлы — точечно игрокам.
+=====================================================================

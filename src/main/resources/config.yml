@@ -1,4 +1,4 @@
-version: 13
+version: 14
 lang: "en"
 
 currencyUse: VAULT # VAULT, EXPERIENCE, LEVEL
@@ -15,6 +15,33 @@ commission:
   enabled: true
   percent: 7.0
   free-quota-mode: LIFETIME # LIFETIME or ACTIVE
+
+# Sounds of the auction. Every player can silence all of them for themselves with
+# /ah sounds off (and bring them back with /ah sounds on).
+# - name : a vanilla sound constant (ENTITY_ITEM_PICKUP, UI_BUTTON_CLICK, ...) or any custom
+#   sound event of your resource pack (custom.cashregister, mypack:ui.click).
+# - volume : 1.0 is the normal loudness at the player's own position, 0.5 is quiet, 2.0 carries further.
+# - pitch : 1.0 is normal, 0.5 is an octave down, 2.0 an octave up.
+# There is no gui hover sound : the client never tells the server which slot the mouse is over,
+# so hovering cannot be heard server-side. guiClick covers every press on a button or an item.
+sounds:
+  sell: # A lot is listed with /ah sell
+    name: "ENTITY_ITEM_PICKUP"
+    volume: 2.0
+    pitch: 1.0
+  expireClaim: # An expired item is taken back from /ah expire
+    name: "ENTITY_PUFFER_FISH_BLOW_UP"
+    volume: 1.0
+    pitch: 1.0
+  buy: # A purchase completes (buyer and online seller)
+    custom: "custom.cashregister" # Resource-pack sound, played when set. "" to always use the vanilla sound below
+    name: "ENTITY_VILLAGER_TRADE"
+    volume: 0.5
+    pitch: 1.0
+  guiClick: # Buttons and items of the auction guis
+    name: "UI_BUTTON_CLICK"
+    volume: 0.5
+    pitch: 1.0
 
 defaultGui: AUCTION # The default gui open with /ah command
 
@@ -71,6 +98,7 @@ onBuy:
 expiration:
   time: 3600 #In seconds 3600 seconds == 1 Hour
   checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
+  expiredStorageDays: 3 # Days an item stays in /ah expire before being deleted. The permissions FAuction_expireDay_1 .. FAuction_expireDay_10 each add that many days and stack together. -1 : never delete
 currencyCheck:
   time: 3600 #In seconds 3600 seconds == 1 Hour
   checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
