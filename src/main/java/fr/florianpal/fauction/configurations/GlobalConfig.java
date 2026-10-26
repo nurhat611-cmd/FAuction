@@ -56,6 +56,8 @@ public class GlobalConfig {
     private int time;
     private int checkEvery;
 
+    private int expiredStorageDays = 3;
+
     private int timeCurrency;
     private int checkEveryCurrency;
 
@@ -128,6 +130,9 @@ public class GlobalConfig {
         // fall back on a usable value.
         time = config.getInt("expiration.time", 3600);
         checkEvery = config.getInt("expiration.checkEvery", 72000);
+        // -1 keeps the historical behaviour (expired items are kept forever) for the servers
+        // that do not want a forgotten-items purge ; anything lower is read as -1.
+        expiredStorageDays = Math.max(-1, config.getInt("expiration.expiredStorageDays", 3));
         updateCacheEvery = config.getInt("cacheUpdate", 72000);
 
         timeCurrency = config.getInt("currencyCheck.time", 3600);

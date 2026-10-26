@@ -40,6 +40,7 @@ class GlobalConfigTest {
         assertFalse(config.isFeatureDuplicationHashCodeControl());
         assertEquals(5, config.getLimitations().get("default"));
         assertTrue(config.isCommissionEnabled());
+        assertEquals(3, config.getExpiredStorageDays());
         assertEquals(7.0, config.getCommissionPercent());
         assertEquals(FreeQuotaMode.LIFETIME, config.getCommissionFreeQuotaMode());
     }
@@ -66,6 +67,7 @@ class GlobalConfigTest {
                 expiration:
                   time: 60
                   checkEvery: 1200
+                  expiredStorageDays: 9
                 limitations:
                   default: 5
                   vip: 20
@@ -79,6 +81,7 @@ class GlobalConfigTest {
         assertEquals(1200, config.getUpdateCacheEvery());
         assertEquals(60, config.getTime());
         assertEquals(1200, config.getCheckEvery());
+        assertEquals(9, config.getExpiredStorageDays());
         assertFalse(config.isFeatureFlippingExpiration());
         assertTrue(config.isFeatureFlippingMoneyFormat());
         assertTrue(config.isFeatureDuplicationHashCodeControl());

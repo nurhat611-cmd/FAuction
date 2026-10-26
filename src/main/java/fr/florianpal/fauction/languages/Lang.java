@@ -36,7 +36,7 @@ public final class Lang {
      * as the first version of the pattern, so it receives the whole relocation chain with no
      * detection code of ours.
      */
-    public static final String VERSION = "3";
+    public static final String VERSION = "4";
 
     static final String VERSION_ROUTE = "version";
 

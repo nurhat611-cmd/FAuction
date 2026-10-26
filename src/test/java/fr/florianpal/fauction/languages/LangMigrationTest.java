@@ -112,7 +112,7 @@ class LangMigrationTest {
         Lang lang = loadWith(code, legacyFile(code));
         String file = fileOf(code);
 
-        assertEquals("3", versionOf(code), "the file is versioned from now on");
+        assertEquals("4", versionOf(code), "the file is versioned from now on");
         assertFalse(file.contains("acf-minecraft"), "the unused section is gone");
         assertFalse(file.contains("acf-core"), "the framework section is gone");
 
@@ -202,7 +202,7 @@ class LangMigrationTest {
     void freshInstallWritesTheFile(String code, String auctionOpen) throws IOException {
         Lang lang = loadWith(code, null);
 
-        assertEquals("3", versionOf(code));
+        assertEquals("4", versionOf(code));
         assertEquals(auctionOpen, lang.raw("fauction.auction_open").orElseThrow());
         assertFalse(dataFolder.resolve("lang_" + code + ".yml.bak").toFile().exists(), "nothing to back up");
     }

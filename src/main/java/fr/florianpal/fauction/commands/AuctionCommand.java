@@ -9,10 +9,12 @@ import fr.florianpal.fauction.gui.subGui.*;
 import fr.florianpal.fauction.languages.MessageKeys;
 import fr.florianpal.fauction.managers.ClaimManager;
 import fr.florianpal.fauction.managers.CommissionManager;
+import fr.florianpal.fauction.managers.ExpireStorageManager;
 import fr.florianpal.fauction.managers.SpamManager;
 import fr.florianpal.fauction.managers.commandmanagers.AuctionCommandManager;
 import fr.florianpal.fauction.managers.commandmanagers.ExpireCommandManager;
 import fr.florianpal.fauction.managers.commandmanagers.HistoricCommandManager;
+import fr.florianpal.fauction.managers.commandmanagers.LimitationManager;
 import fr.florianpal.fauction.objects.Auction;
 import fr.florianpal.fauction.objects.Category;
 import fr.florianpal.fauction.utils.CurrencyUtil;
@@ -81,6 +83,8 @@ public class AuctionCommand {
     static final String MIGRATE_VERSION_PARSER = "fauction:migrate_version";
 
     static final String MIGRATE_VERSION_SUGGESTIONS = "fauction:migrate_versions";
+
+    static final String ONLINE_PLAYER_SUGGESTIONS = "fauction:online_players";
 
     private final FAuction plugin;
 
@@ -231,12 +235,7 @@ public class AuctionCommand {
 
             List<Auction> auctions = sellData.auctions();
 
-            int limitations;
-            if (plugin.getConfigurationManager().getGlobalConfig().isLimitationsUseMetaLuckperms()) {
-                limitations = plugin.getLimitationManager().getAuctionLimitationByMeta(playerSender);
-            } else {
-                limitations = plugin.getLimitationManager().getAuctionLimitationByConfig(playerSender);
-            }
+            int limitations = plugin.getLimitationManager().getAuctionLimitation(playerSender);
 
 
             if (limitations != -1 && limitations <= auctions.size()) {
@@ -557,6 +556,55 @@ public class AuctionCommand {
             plugin.purgeAllAuction();
             MessageUtil.sendMessage(plugin, playerSender, MessageKeys.AUCTION_PURGE);
         }).execute();
+    }
+
+    @Command(ROOT + SPACE + ADMIN + SPACE + "slots <playerName>")
+    @Permission("fauction.admin.slots")
+    @CommandDescription("{@@fauction.slots_info_help_description}")
+    public void onAdminSlots(Player playerSender, @Argument(value = "playerName", suggestions = ONLINE_PLAYER_SUGGESTIONS) String playerName) {
+
+        Player target = Bukkit.getPlayerExact(playerName);
+        if (target == null) {
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.PLAYER_NOT_ONLINE, "{player}", playerName);
+            return;
+        }
+
+        FAuction.newChain(playerSender).asyncFirst(() -> auctionCommandManager.getAuctions(target.getUniqueId()).size()).syncLast(active -> {
+            int baseLimit = plugin.getLimitationManager().getBaseAuctionLimitation(target);
+            int extraSlots = plugin.getLimitationManager().getExtraSlots(target);
+            int totalLimit = plugin.getLimitationManager().getAuctionLimitation(target);
+            String totalText = totalLimit < 0 ? "∞" : String.valueOf(totalLimit);
+            String freeText = totalLimit < 0 ? "∞" : String.valueOf(Math.max(0, totalLimit - active));
+
+            int baseStorageDays = plugin.getExpireStorageManager().getBaseStorageDays();
+            int storageBonusDays = plugin.getExpireStorageManager().getBonusDays(target);
+            String storageDaysText = baseStorageDays < 0 ? "∞" : String.valueOf(baseStorageDays + storageBonusDays);
+
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_HEADER, "{player}", target.getName());
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_BASE, "{base}", String.valueOf(baseLimit));
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_BONUS, "{extra}", String.valueOf(extraSlots), "{permissions}", heldPermissions(target, LimitationManager.EXTRA_SLOT_PERMISSION_PREFIX));
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_TOTAL, "{free}", freeText, "{total}", totalText, "{active}", String.valueOf(active));
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SLOTS_INFO_STORAGE, "{days}", storageDaysText, "{base}", String.valueOf(baseStorageDays), "{bonus}", String.valueOf(storageBonusDays), "{permissions}", heldPermissions(target, ExpireStorageManager.PERMISSION_PREFIX));
+        }).execute();
+    }
+
+    /**
+     * The {@code <prefix>1 .. <prefix>10} permissions of the series the player actually holds,
+     * "-" when they hold none : what the administrator needs to see to understand a bonus.
+     */
+    private String heldPermissions(Player target, String prefix) {
+        List<String> held = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            if (target.hasPermission(prefix + i)) {
+                held.add(prefix + i);
+            }
+        }
+        return held.isEmpty() ? "-" : String.join(", ", held);
+    }
+
+    @Suggestions(ONLINE_PLAYER_SUGGESTIONS)
+    public List<String> onlinePlayerSuggestions() {
+        return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
     }
 
     // Two spellings, one wipe : "clear data players" is the form asked for when a season ends,

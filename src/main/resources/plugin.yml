@@ -44,6 +44,7 @@ permissions:
       fauction.admin.transfertBddToPaper: true
       fauction.admin.migrate: true
       fauction.admin.clear.players: true
+      fauction.admin.slots: true
   fauction.admin.reload:
     description: Reload the configuration
     default: op
@@ -85,4 +86,67 @@ permissions:
     default: false
   fauction.nocommission.25:
     description: List 25 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.admin.slots:
+    description: Show the slot and expired-storage permissions of a player (/ah admin slots <player>)
+    default: op
+  FAuction_dubleSlot_1:
+    description: 1 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_2:
+    description: 2 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_3:
+    description: 3 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_4:
+    description: 4 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_5:
+    description: 5 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_6:
+    description: 6 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_7:
+    description: 7 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_8:
+    description: 8 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_9:
+    description: 9 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_dubleSlot_10:
+    description: 10 extra auction slot(s) on top of the rank limit (the FAuction_dubleSlot_* permissions stack together)
+    default: false
+  FAuction_expireDay_1:
+    description: Keep expired items in /ah expire 1 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_2:
+    description: Keep expired items in /ah expire 2 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_3:
+    description: Keep expired items in /ah expire 3 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_4:
+    description: Keep expired items in /ah expire 4 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_5:
+    description: Keep expired items in /ah expire 5 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_6:
+    description: Keep expired items in /ah expire 6 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_7:
+    description: Keep expired items in /ah expire 7 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_8:
+    description: Keep expired items in /ah expire 8 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_9:
+    description: Keep expired items in /ah expire 9 extra day(s) (the FAuction_expireDay_* permissions stack together)
+    default: false
+  FAuction_expireDay_10:
+    description: Keep expired items in /ah expire 10 extra day(s) (the FAuction_expireDay_* permissions stack together)
     default: false

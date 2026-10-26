@@ -1,6 +1,6 @@
 # Language file of FAuction. "version" is managed by the plugin : leave it alone,
 # it is what lets your own texts be kept when new keys are added.
-version: 3
+version: 4
 fauction:
   help_description: "Показывает справку."
   auction_list_help_description: "Открыть аукцион"
@@ -13,6 +13,7 @@ fauction:
   auction_search_help_description: "Поиск предмета"
   migrate_help_description: "Мигрировать на другую версию."
   clear_players_help_description: "Очистить данные аукциона игроков и счётчики лотов без комиссии"
+  slots_info_help_description: "Показать права игрока на слоты и хранение просроченных товаров"
 
   buy_auction_success: "Вы успешно купили {item} за {price}."
   buy_auction_target_success: "Игрок {player} купил ваш предмет {item} за {price}."
@@ -48,6 +49,12 @@ fauction:
   commission_paid: "Списана комиссия аукциона: {fee} ({percent}%)."
   commission_free: "Лот выставлен без комиссии. Осталось лотов без комиссии: {remaining}."
   commission_not_enough: "У вас недостаточно денег для оплаты комиссии аукциона: {fee} ({percent}%)."
+  player_not_online: "Игрок {player} не в сети."
+  slots_info_header: "&6Слоты аукциона игрока {player}:"
+  slots_info_base: "&7Базовый лимит: &f{base}"
+  slots_info_bonus: "&7Бонус от прав: &f+{extra} &8({permissions})"
+  slots_info_total: "&7Доступно слотов: &f{free}&7/&f{total} &8(активных лотов: {active})"
+  slots_info_storage: "&7Хранение просроченных: &f{days} дн. &8(база {base} + бонус {bonus}: {permissions})"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

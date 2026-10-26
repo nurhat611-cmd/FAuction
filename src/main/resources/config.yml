@@ -1,4 +1,4 @@
-version: 13
+version: 14
 lang: "en"
 
 currencyUse: VAULT # VAULT, EXPERIENCE, LEVEL
@@ -71,6 +71,7 @@ onBuy:
 expiration:
   time: 3600 #In seconds 3600 seconds == 1 Hour
   checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
+  expiredStorageDays: 3 # Days an item stays in /ah expire before being deleted. The permissions FAuction_expireDay_1 .. FAuction_expireDay_10 each add that many days and stack together. -1 : never delete
 currencyCheck:
   time: 3600 #In seconds 3600 seconds == 1 Hour
   checkEvery: 72000 #In ticks 72000 ticks == 1 Hour

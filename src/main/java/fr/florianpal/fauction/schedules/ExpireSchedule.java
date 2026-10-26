@@ -2,13 +2,17 @@ package fr.florianpal.fauction.schedules;
 
 import fr.florianpal.fauction.FAuction;
 import fr.florianpal.fauction.events.ExpireAddEvent;
+import fr.florianpal.fauction.managers.ExpireStorageManager;
 import fr.florianpal.fauction.objects.Auction;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ExpireSchedule implements Runnable {
 
@@ -46,7 +50,36 @@ public class ExpireSchedule implements Runnable {
                     Bukkit.getPluginManager().callEvent(new ExpireAddEvent(auction.getPlayerUUID(), auction));
                 }
             }
+
+            purgeForgottenExpires(now);
         }).execute();
+    }
+
+    /**
+     * Deletes the expired items whose storage time is over : the 3 days of config.yml
+     * ({@code expiration.expiredStorageDays}) plus the stacked {@code FAuction_expireDay_<n>}
+     * permissions of their owner, counted from the moment the lot left the market. Runs in the
+     * same pass as the market expiration, so a lot moved above is never judged before its full
+     * storage time has elapsed.
+     */
+    private void purgeForgottenExpires(Date now) {
+        ExpireStorageManager storageManager = plugin.getExpireStorageManager();
+        if (storageManager == null || !storageManager.isPurgeEnabled()) {
+            return;
+        }
+
+        // The bonus is a property of the owner, not of the lot : resolve it once per player and
+        // not once per forgotten item.
+        Map<UUID, Long> storageDurationByPlayer = new HashMap<>();
+        for (Auction expire : plugin.getExpireCommandManager().getExpires()) {
+            long storageDuration = storageDurationByPlayer.computeIfAbsent(expire.getPlayerUUID(),
+                    uuid -> storageManager.getStorageDurationMillis(Bukkit.getOfflinePlayer(uuid)));
+            if (storageManager.isStorageExpired(expire, storageDuration, now)
+                    && plugin.getExpireCommandManager().deleteExpire(expire.getId())) {
+                plugin.getLogger().info("Expired item " + expire.getId() + " of " + expire.getPlayerName()
+                        + " deleted : its storage time in /ah expire is over.");
+            }
+        }
     }
 
     /**

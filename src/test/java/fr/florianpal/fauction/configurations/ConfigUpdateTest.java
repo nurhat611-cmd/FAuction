@@ -48,7 +48,8 @@ class ConfigUpdateTest {
 
         assertEquals(List.of("ah", "hdv"), updated.getStringList("commands.root"));
         assertEquals(List.of("sell"), updated.getStringList("commands.sell"));
-        assertEquals("13", String.valueOf(updated.get("version")));
+        assertEquals("14", String.valueOf(updated.get("version")));
+        assertEquals(3, updated.getInt("expiration.expiredStorageDays"));
         assertTrue(updated.getBoolean("commission.enabled"));
         assertEquals(7.0, updated.getDouble("commission.percent"));
         assertEquals("LIFETIME", updated.getString("commission.free-quota-mode"));

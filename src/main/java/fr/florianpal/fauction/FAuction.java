@@ -92,6 +92,9 @@ public class FAuction extends JavaPlugin {
     private CommissionManager commissionManager;
 
     @Getter
+    private ExpireStorageManager expireStorageManager;
+
+    @Getter
     private TransfertManager transfertManager;
 
     @Getter
@@ -194,6 +197,7 @@ public class FAuction extends JavaPlugin {
         spamManager = new SpamManager(this);
         claimManager = new ClaimManager();
         commissionManager = new CommissionManager(this);
+        expireStorageManager = new ExpireStorageManager(this);
         transfertManager = new TransfertManager(this);
 
         commandManager.register(new AuctionCommand(this));
