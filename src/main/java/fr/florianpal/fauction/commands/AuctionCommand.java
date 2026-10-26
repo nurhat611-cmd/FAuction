@@ -112,14 +112,11 @@ public class AuctionCommand {
     static final List<String> AMOUNT_SUGGESTION_VALUES = List.of("1", "16", "32", "64");
 
     /**
-     * Every material that can be held as an item, under the lowercase name players type. Sorted
-     * once : the suggestions of {@code /ah search} narrow this list on what is already typed.
+     * The names behind {@link #materialNames()}, built on first use. Not a static initializer :
+     * {@code Material} leans on the registries of a running server, and the class must stay
+     * loadable before one is up (the tests, for instance).
      */
-    static final List<String> MATERIAL_NAMES = Arrays.stream(Material.values())
-            .filter(material -> material.isItem() && !material.isAir())
-            .map(material -> material.name().toLowerCase(Locale.ROOT))
-            .sorted()
-            .toList();
+    private static volatile List<String> materialNames;
 
     private final FAuction plugin;
 
@@ -879,6 +876,25 @@ public class AuctionCommand {
         return materialSuggestionsFor(remaining.substring(remaining.lastIndexOf(' ') + 1));
     }
 
+    /**
+     * Every material there is under the lowercase name players type, minus the airs and the
+     * legacy aliases : the names the suggestions of {@code /ah search} narrow on what is
+     * typed. Names only, deliberately — asking each material whether it is an item would go
+     * through the server registries, and a suggestion has no business depending on them.
+     */
+    static List<String> materialNames() {
+        List<String> names = materialNames;
+        if (names == null) {
+            names = Arrays.stream(Material.values())
+                    .map(material -> material.name().toLowerCase(Locale.ROOT))
+                    .filter(name -> !name.equals("air") && !name.endsWith("_air") && !name.startsWith("legacy_"))
+                    .sorted()
+                    .toList();
+            materialNames = names;
+        }
+        return names;
+    }
+
     static List<String> materialSuggestionsFor(String typed) {
         String fragment = typed == null ? "" : typed.trim().toLowerCase(Locale.ROOT);
         if (fragment.startsWith("minecraft:")) {
@@ -890,7 +906,7 @@ public class AuctionCommand {
         // containing the fragment, for the {@code sword} typed in search of every sword.
         List<String> byPrefix = new ArrayList<>();
         List<String> byFragment = new ArrayList<>();
-        for (String materialName : MATERIAL_NAMES) {
+        for (String materialName : materialNames()) {
             if (materialName.startsWith(fragment)) {
                 byPrefix.add(materialName);
             } else if (materialName.contains(fragment)) {

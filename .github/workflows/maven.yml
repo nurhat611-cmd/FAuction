@@ -30,19 +30,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      # TEMPORARY DIAGNOSTIC (remove): surface the failure through check annotations,
-      # the raw log download is unreachable from the dev sandbox.
-      - name: Diagnose failure
-        if: failure()
-        run: |
-          {
-            echo "--- surefire summaries ---"
-            grep -h -E "Tests run:|<<< (FAILURE|ERROR)|Assertion(Op)?Error|expected:|NoSuchElement|NullPointer" target/surefire-reports/*.txt 2>/dev/null | head -25
-            echo "--- compile check ---"
-            mvn -B test-compile 2>&1 | grep -E "\[ERROR\]|error:" | head -18
-          } | head -46 | while IFS= read -r line; do echo "::error::$line"; done
-          exit 1
-
       - name: Upload the plugin JAR
         uses: actions/upload-artifact@v7
         with:
