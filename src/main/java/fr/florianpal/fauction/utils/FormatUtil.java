@@ -11,7 +11,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,8 +73,8 @@ public class FormatUtil {
     /**
      * The historical spelling, kept byte for byte but written out by hand : the hex colours in
      * the {@code §x§R§R§G§G§B§B} sequence, then the {@code &} codes turned into {@code §} ones.
-     * This is exactly what Bungee's {@code ChatColor} produced (down to the lower-cased hex
-     * digits and codes) — without depending on it, the whole plugin now speaks Adventure.
+     * This is exactly what Bungee's {@code ChatColor} produced (the hex digits keep the case
+     * they were written with, the single-letter codes are lower-cased) — without depending on it, the whole plugin now speaks Adventure.
      */
     private static String legacyFormat(String msg) {
         if (msg == null) {
@@ -86,7 +85,7 @@ public class FormatUtil {
         StringBuilder out = new StringBuilder();
         while (hex.find()) {
             StringBuilder sequence = new StringBuilder("§x");
-            for (char digit : hex.group().substring(1).toLowerCase(Locale.ROOT).toCharArray()) {
+            for (char digit : hex.group().substring(1).toCharArray()) {
                 sequence.append('§').append(digit);
             }
             hex.appendReplacement(out, Matcher.quoteReplacement(sequence.toString()));
