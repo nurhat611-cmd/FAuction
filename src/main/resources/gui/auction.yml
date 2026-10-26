@@ -1,19 +1,26 @@
+# =====================================================================
+# Версия GUI (не меняйте)
+# =====================================================================
 version: 1
+
+# Основные настройки меню
 gui:
-  size: 54
-  type: CHEST
-  name: "Auction House &8>> &f{Page}/{TotalPage}"
-  title: "&eItem : &6{ItemName}"
-  replaceTitle: false
-  hideFlag: false
-  description:
-    - "&5Sold by : &6{OwnerName}"
-    - "&5Price : &6{Price}"
-    - "&5Expires on : &6{ExpireTime}"
-    - "&5Remaining time : &6{RemainingTime}"
-    - "&5Lore :"
+  size: 54                      # Размер инвентаря (54 слота – 6 рядов)
+  type: CHEST                   # Тип контейнера (CHEST)
+  name: "Аукцион &8>> &f{Page}/{TotalPage}"  # Заголовок окна
+  title: "&eПредмет: &6{ItemName}"    # Заголовок над предметом
+  replaceTitle: false           # Заменять ли стандартный заголовок
+  hideFlag: false               # Скрывать ли флаги
+  description:                  # Описание при наведении на лот - "&dИстекает: &7{ExpireTime}"
+    - "&dПродавец: &6{OwnerName}"
+    - "&dСтоимость: &e{Price}⛁"
+    - "&dОсталось: &7{RemainingTime}"
+    - "&dОписание:"
     - "{lore}"
+
+# ===== ПОЛНОЕ РАСПОЛОЖЕНИЕ ЭЛЕМЕНТОВ (ВСЕ СЛОТЫ 0-53) =====
 block:
+  # ---- Лоты: 4 ряда (слоты 0-35) ----
   '0':
     utility: auction
   '1':
@@ -86,120 +93,78 @@ block:
     utility: auction
   '35':
     utility: auction
-  '36':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '37':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '38':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '39':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '40':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '41':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '42':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '43':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '44':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '45':
     utility: player
-    material: NETHER_STAR
-    title: "&5My Items"
+    material: ENDER_CHEST
+    title: "&dМои Товары"
     description:
-      - "&eClick here to see your items for sale"
+      - "&eНажмите, чтобы посмотреть ваши выставленные лоты"
   '46':
     utility: expireGui
     material: CHEST_MINECART
-    title: "&cCollect your expired items"
-    description: { }
+    title: "&cЗабрать просроченные предметы"
+    description: {}
   '47':
     utility: historicGui
     material: WRITABLE_BOOK
-    title: "&cSee our item historic"
-    description: { }
+    title: "&dИстория предметов"
+    description: {}
   '48':
     utility: previous
     material: ARROW
-    title: "&5Previous Page"
+    title: '&5Previous page'
     description:
-      - "&eClick here to return to previous page"
+    - '&eНажмите здесь, чтобы вернуться на предыдущую страницу'
     replacement:
       material: AIR
-      title: " "
+      title: ' '
       description: {}
   '49':
     utility: barrier
     material: PLAYER_HEAD
-    texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTY0MzlkMmUzMDZiMjI1NTE2YWE5YTZkMDA3YTdlNzVlZGQyZDUwMTVkMTEzYjQyZjQ0YmU2MmE1MTdlNTc0ZiJ9fX0="
-    title: "Informations"
+    texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTY0MzlkMmUzMDZiMjI1NTE2YWE5YTZkMDA3YTdlNzVlZGQyZDUwMTVkMTEzYjQyZjQ0YmU2MmE1MTdlNTc0ZiJ9fX0=
+    title: "&9Информация"
     description:
-      - "&7Welcome to the auction house"
-      - "&7Here, all players can sell"
-      - "&7and buy things."
+      - "&7Добро пожаловать на аукцион!"
+      - "&7Здесь игроки могут продавать"
+      - "&7и покупать предметы."
       - ""
-      - "&7To sell an item, you must:"
-      - "&a/ah sell &7<&aprice&7>"
-      - "&7Number of sales in progress: &b{TotalSale}"
-      - "&7Your free listings left: &b{FreeListings}"
-      - "&7Your available slots: &b{FreeSlots}"
+      - "&7Чтобы продать предмет:"
+      - "&a/ah sell &8<&aцена&8>"
+      - ""
+      - "&eАктивных продаж: &b{TotalSale}"
+      - "&7Бесплатных лотов осталось: &b{FreeListings}"
+      - "&7Свободных слотов: &b{FreeSlots}"
   '50':
     utility: next
     material: ARROW
-    title: "&5Next Page"
+    title: '&5Next page'
     description:
-      - "&eClick here to go to the next page"
+    - '&eНажмите здесь, чтобы перейти на следующую страницу'
     replacement:
       material: AIR
-      title: " "
+      title: ' '
       description: {}
   '51':
     utility: category
     material: BOOK
-    title: "&5Filter."
+    title: "&6Категории"
     description:
-      - "&eClick here to change filter"
-      - "{previousCategories}"
-      - "&e{currentCategory}"
-      - "{nextCategories}"
+    - "&eНажмите, чтобы изменить категорию"
+    - "&8-------------------------------"
+    - "{previousCategories}"
+    - "&b{currentCategory}"
+    - "{nextCategories}"
+    - "&8-------------------------------"
   '52':
     utility: sorting
     material: BOOK
-    title: "&5Sort."
+    title: "&6Сортировка"
     description:
-      - "&eClick here to sort item"
-      - "&eCurrent sort : {sortDisplayName}"
+    - "&eНажмите, чтобы изменить сортировку"
+    - "&eТекущая сортировка: &b{sortDisplayName}"
   '53':
     utility: close
     material: BARRIER
-    title: "Close"
+    title: "&4Выйти из аукциона"
     description: {}

@@ -14,56 +14,6 @@ gui:
     - "&5Lore :"
     - "{lore}"
 block:
-  '0':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '1':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '2':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '3':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '4':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '5':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '6':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '7':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '8':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '9':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '10':
     utility: historic
   '11':
@@ -78,16 +28,6 @@ block:
     utility: historic
   '16':
     utility: historic
-  '17':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '18':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '19':
     utility: historic
   '20':
@@ -102,16 +42,6 @@ block:
     utility: historic
   '25':
     utility: historic
-  '26':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '27':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '28':
     utility: historic
   '29':
@@ -126,16 +56,6 @@ block:
     utility: historic
   '34':
     utility: historic
-  '35':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '36':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '37':
     utility: historic
   '38':
@@ -150,11 +70,6 @@ block:
     utility: historic
   '43':
     utility: historic
-  '44':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '45':
     utility: auctionGui
     material: CHEST

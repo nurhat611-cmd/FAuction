@@ -1,60 +1,80 @@
-version: 14
-lang: "en"
+# =====================================================================
+# Версия конфигурации. Не меняйте, иначе плагин сбросит настройки.
+# =====================================================================
+version: 15
 
-currencyUse: VAULT # VAULT, EXPERIENCE, LEVEL
+# Язык плагина (ru = русский, en, fr, zhcn)
+lang: ru
 
-# Auction commission, charged to the seller when a lot is listed with /ah sell.
-# - percent : part of the price taken as commission (7.0 == 7%).
-# - The permissions fauction.nocommission.3 / .5 / .7 / .10 / .16 / .25 let a player list that
-#   many lots WITHOUT paying it. With several of them, the highest tier wins (they do not add up).
-# - free-quota-mode LIFETIME : the quota is spent for good, lot after lot ; the per-player counter
-#   only goes back to zero on a wipe (/ah clear data players).
-# - free-quota-mode ACTIVE : only the free lots currently on the market count ; a free slot comes
-#   back as soon as its lot is sold, cancelled or expired.
+# Валюта, используемая в аукционе:
+# VAULT    – деньги с плагина Vault (Essentials и т.п.)
+# EXPERIENCE – опыт (уровни)
+# LEVEL    – уровни (как опыт, но другое API)
+currencyUse: VAULT
+
+# Комиссия аукциона: списывается с продавца при выставлении лота (/ah sell).
+# - percent : процент от цены (7.0 == 7%).
+# - Права fauction.nocommission.3 / .5 / .7 / .10 / .16 / .25 дают выставить столько лотов
+#   БЕЗ комиссии. При нескольких правах берётся максимальное (они НЕ суммируются).
+# - free-quota-mode LIFETIME : квота тратится навсегда, счётчик сбрасывает только вайп
+#   (/ah clear data players).
+# - free-quota-mode ACTIVE : считаются только бесплатные лоты, сейчас висящие на витрине;
+#   слот возвращается при продаже/снятии/истечении лота.
 commission:
   enabled: true
   percent: 7.0
-  free-quota-mode: LIFETIME # LIFETIME or ACTIVE
+  free-quota-mode: LIFETIME # LIFETIME или ACTIVE
 
-# Sounds of the auction. Every player can silence all of them for themselves with
-# /ah sounds off (and bring them back with /ah sounds on).
-# - name : a vanilla sound constant (ENTITY_ITEM_PICKUP, UI_BUTTON_CLICK, ...) or any custom
-#   sound event of your resource pack (custom.cashregister, mypack:ui.click).
-# - volume : 1.0 is the normal loudness at the player's own position, 0.5 is quiet, 2.0 carries further.
-# - pitch : 1.0 is normal, 0.5 is an octave down, 2.0 an octave up.
-# There is no gui hover sound : the client never tells the server which slot the mouse is over,
-# so hovering cannot be heard server-side. guiClick covers every press on a button or an item.
+# Звуки аукциона. Каждый игрок выключает их себе командой /ah sounds off (и включает /ah sounds on).
+# - name : ванильный звук (ENTITY_ITEM_PICKUP, UI_BUTTON_CLICK, ...) или кастомный звук
+#   ресурспака (custom.cashregister, mypack:ui.click).
+# - volume : 1.0 обычная громкость, 0.5 тише, 2.0 слышно дальше.
+# - pitch : 1.0 обычный, 0.5 октавой ниже, 2.0 октавой выше.
+# Звука НАВЕДЕНИЯ курсора не существует: клиент не сообщает серверу, над каким слотом мышь.
+# guiClick покрывает нажатия на кнопки и предметы меню.
 sounds:
-  sell: # A lot is listed with /ah sell
+  sell: # Лот выставлен через /ah sell
     name: "ENTITY_ITEM_PICKUP"
     volume: 2.0
     pitch: 1.0
-  expireClaim: # An expired item is taken back from /ah expire
+  expireClaim: # Просроченный предмет забран из /ah expire
     name: "ENTITY_PUFFER_FISH_BLOW_UP"
     volume: 1.0
     pitch: 1.0
-  buy: # A purchase completes (buyer and online seller)
-    custom: "custom.cashregister" # Resource-pack sound, played when set. "" to always use the vanilla sound below
+  buy: # Покупка завершена (покупатель и онлайн-продавец)
+    custom: "custom.cashregister" # Звук из ресурспака, если задан. "" = всегда ванильный звук ниже
     name: "ENTITY_VILLAGER_TRADE"
     volume: 0.5
     pitch: 1.0
-  guiClick: # Buttons and items of the auction guis
+  guiClick: # Кнопки и предметы в меню аукциона
     name: "UI_BUTTON_CLICK"
     volume: 0.5
     pitch: 1.0
 
-defaultGui: AUCTION # The default gui open with /ah command
+# Встроенный раздающий сервер ресурспака со звуком кассы (sounds.buy.custom).
+# Пак уже внутри jar плагина: сервер поднимает маленький HTTP-сервер на указанном порту
+# и сам отправляет пак Java-игрокам при входе. Bedrock-игроки (Geyser/Floodgate) пак не
+# получают и слышат ванильную замену (sounds.buy.name).
+# - port : свободный порт, который надо открыть/пробросить на хостинге.
+# - host : IP или домен, по которому игроки подключаются к серверу (для ссылки на пак).
+#   Пусто = взять server-ip из server.properties; если и тот пуст, плагин предупредит в консоли.
+# - required : true = не пускать игроков, отклонивших пак.
+# - prompt : текст над кнопками при запросе пака (можно пустой). Цвета: & и <MiniMessage>.
+resource-pack:
+  enabled: true
+  port: 8765
+  host: ""
+  required: false
+  prompt: "&6Звуковой пак аукциона (касса при покупке)"
 
-# Names and aliases of the commands.
-# The FIRST value of a list is the main name, the one shown in /ah help and in the error messages ;
-# the next ones are aliases. Ex : sell: ["vendre", "sell"] makes /ah vendre 10 and /ah sell 10 work,
-# and the help shows "vendre".
-# - The permissions never change : renaming "sell" keeps fauction.sell.
-# - A name must be a single word, without any of | < > [ ] { } : / \ $ " '
-# - An unusable entry, or two subcommands sharing a name, is ignored and the defaults are used
-#   instead : look at the server console, it says exactly what was refused.
-# - The commands are registered when the server starts : a change here needs a full restart,
-#   /ah admin reload is not enough.
+# Меню, которое открывается по команде /ah (по умолчанию AUCTION)
+defaultGui: AUCTION
+
+# Названия и алиасы команд.
+# ПЕРВОЕ значение списка — основное имя (показывается в /ah help и ошибках), остальные — алиасы.
+# - Права при переименовании не меняются: sell под любым именем остаётся fauction.sell.
+# - Имя — одно слово без | < > [ ] { } : / \ $ " '
+# - Команды регистрируются при старте сервера: правки здесь требуют рестарта, а не reload.
 commands:
   root: ["ah", "hdv"]
   list: ["list"]
@@ -64,58 +84,94 @@ commands:
   help: ["help"]
   admin: ["admin"]
 
+# ===== Экспериментальные функции =====
 feature-flipping:
-  item-expiration: true
-  cache-update: true
-  money-format: false
-  duplication-hashcode-control: false
+  item-expiration: true      # Включить автоматическое удаление просроченных лотов
+  cache-update: true         # Обновлять кэш данных (для производительности)
+  money-format: false        # Красивое форматирование больших чисел (вкл/выкл)
+  duplication-hashcode-control: false # Защита от дублирования предметов (хэш-код)
 
+# Формат отображения цен (0.00 = две цифры после запятой)
 decimalFormat: "0.00"
 
 update-checker:
-  enabled: true # Check GitHub at startup and on reload for a new release and warn the console
+  enabled: true # Проверять обновления на GitHub при старте и reload, предупреждать в консоли
 
-orderBy: "ASC" # ASC or DESC / ASC : More recent to older / DESC : Older to more recent || Deprecated use sort.yml
+# Устаревшая настройка сортировки (лучше использовать sort.yml)
+orderBy: "ASC" # ASC – сначала новые, DESC – сначала старые
+
+# Формат даты в меню (день/месяц/год : час:минута)
 dateFormat: "dd/MM/yyyy ':' HH:mm"
-remainingDateFormat: "MMM ddd HHh mmm sss"
-securityForSpammingPacket: true # Anti packet spamming protection. Players with the permission fauction.bypass.spam are ignored
-anti-spam: # Each action type has its own budget : "burst" actions are allowed in a row, then "perSecond" actions per second
-  messageCooldown: 3000 # Minimum delay in ms between two warning messages sent to the same player
-  logThreshold: 25 # Number of actions blocked in a row before warning the console. 0 to disable the logs
-  interact: # Click on an item in a gui
-    burst: 8
-    perSecond: 4
-  command: # /ah, /ah search
-    burst: 6
-    perSecond: 2
-  transaction: # Purchase confirmation, /ah sell
+
+# Формат оставшегося времени (день, часы, минуты)
+remainingDateFormat: "ddd HHh mmm"
+
+# ===== Защита от спама пакетами =====
+securityForSpammingPacket: true  # Игроки с правом fauction.bypass.spam игнорируются
+
+# ===== Анти-спам для разных действий =====
+anti-spam:
+  messageCooldown: 2000   # Задержка между предупреждениями (мс)
+  logThreshold: 25        # Логировать в консоль, если >25 спам-действий подряд (0 = отключить)
+  interact:               # Клики по предметам в меню
+    burst: 5
+    perSecond: 3
+  command:                # Команды (/ah, /ah search)
     burst: 4
     perSecond: 2
+  transaction:            # Подтверждение покупки, продажа (/ah sell)
+    burst: 4
+    perSecond: 2
+
+# Действия при покупке (можно выполнить команду после покупки).
+# Звук покупки теперь встроенный (секция sounds выше), команда для него не нужна.
 onBuy:
-  sendCommand: # Command sends if item is buying
+  sendCommand:
     use: false
     command: ""
+
+# ===== Таймеры =====
 expiration:
-  time: 3600 #In seconds 3600 seconds == 1 Hour
-  checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
-  expiredStorageDays: 3 # Days an item stays in /ah expire before being deleted. The permissions FAuction_expireDay_1 .. FAuction_expireDay_10 each add that many days and stack together. -1 : never delete
+  time: 172800        # Время жизни лота (секунды) – 172800 = 2 дня
+  checkEvery: 36000   # Как часто проверять просроченные лоты (тики) – 36000 = 30 минут
+  expiredStorageDays: 3 # Дней предмет лежит в /ah expire, потом удаляется. Права FAuction_expireDay_1..10 каждое добавляет столько дней и суммируются. -1 : не удалять никогда
+
 currencyCheck:
-  time: 3600 #In seconds 3600 seconds == 1 Hour
-  checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
+  time: 3600            # Интервал проверки валюты (секунды)
+  checkEvery: 72000     # Как часто проверять (тики)
 
-cacheUpdate: 72000 #In ticks 72000 ticks == 1 Hour
+cacheUpdate: 600        # Интервал обновления кэша (тики) – 600 = 30 секунд
 
+# ===== ОГРАНИЧЕНИЯ ПО ГРУППАМ =====
+# false = брать лимиты из списка limitations ниже (группа Vault игрока; берётся максимум).
+# true  = брать лимит из мета LuckPerms.
 limitations-use-meta-luckperms: false
-limitations: # Number of auction per rank
-  default: 5
+
+# Лимиты лотов по группам (переведено из бывшего vault-auc — плагин читает именно этот список).
+# Поверх этого права FAuction_dubleSlot_1..10 каждое добавляет столько слотов и суммируются.
+limitations:
+  default: 12
+  adventurer: 16
+  spellcaster: 22
+  magister: 30
+  archimage: 40
+  lord: 55
+  creator: 9999
+
+# ===== Глобальные ограничения по цене =====
 min-price-default:
-  enable: false
-  value: 0
+  enable: false        # Включить глобальную минимальную цену (за штуку)
+  value: 1
 max-price-default:
-  enable: false
-  value: 100000000
-min-price: # Min price per item. Ex : 1 CobbleStone at 0.5. Set {} to disable it
-  COBBLESTONE: 0.5
-max-price: # Max price per item. Ex : 1 CobbleStone at 0.5. Set {} to disable it
-  COBBLESTONE: 5
+  enable: false        # Включить глобальную максимальную цену (за штуку)
+  value: 999999999
+
+# ===== Индивидуальные ограничения для конкретных предметов =====
+# Пример:
+#min-price:
+#  COBBLESTONE: 0.5
+min-price: {}
+max-price: {}
+
+# ===== Чёрный список предметов =====
 item-blacklist: []
