@@ -8,6 +8,8 @@ import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import fr.florianpal.fauction.FAuction;
 import fr.florianpal.fauction.utils.FormatUtil;
+import fr.florianpal.fauction.utils.TextUtil;
+import net.kyori.adventure.text.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -182,6 +184,23 @@ public final class Lang {
      */
     public Optional<String> message(MessageKeys key, String... replacements) {
         return raw(key.getKey()).map(message -> render(message, replacements));
+    }
+
+    /**
+     * The message as a component, for the chat of a player : the same interpolation and ACF
+     * tags as {@link #message}, then read by {@link TextUtil} — legacy codes and MiniMessage
+     * alike, without the round trip through a legacy string that would flatten a gradient.
+     */
+    public Optional<Component> component(MessageKeys key, String... replacements) {
+        return raw(key.getKey()).map(message -> TextUtil.parse(translateAcfTags(interpolate(message, replacements))));
+    }
+
+    /**
+     * {@link #component} for a raw route, with the same never-silent contract as
+     * {@link #messageOr}.
+     */
+    public Component componentOr(String route, String fallback, String... replacements) {
+        return TextUtil.parse(translateAcfTags(interpolate(raw(route).orElse(fallback), replacements)));
     }
 
     /**

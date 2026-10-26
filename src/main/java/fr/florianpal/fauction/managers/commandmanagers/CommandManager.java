@@ -8,7 +8,6 @@ import fr.florianpal.fauction.configurations.CommandsConfig;
 import fr.florianpal.fauction.enums.CommandKey;
 import fr.florianpal.fauction.enums.MigrateVersion;
 import fr.florianpal.fauction.languages.MessageKeys;
-import fr.florianpal.fauction.utils.FormatUtil;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -254,7 +253,7 @@ public class CommandManager {
     }
 
     private ComponentLike error(String key, String... replacements) {
-        return FormatUtil.component(plugin.getLang().messageOr(ERROR_PREFIX + key, key, replacements));
+        return plugin.getLang().componentOr(ERROR_PREFIX + key, key, replacements);
     }
 
     /**
@@ -262,6 +261,6 @@ public class CommandManager {
      * the same silence a key absent from the language file gets everywhere else.
      */
     private ComponentLike message(MessageKeys key) {
-        return plugin.getLang().message(key).map(FormatUtil::component).orElse(null);
+        return plugin.getLang().component(key).orElse(null);
     }
 }

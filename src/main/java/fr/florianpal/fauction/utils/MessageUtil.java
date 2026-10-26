@@ -13,8 +13,8 @@ public class MessageUtil {
      * A key absent from the language file sends nothing, which is what ACF did.
      */
     public static void sendMessage(FAuction plugin, Player player, MessageKeys messageKeys, String... replacements) {
-        // Legacy string on purpose : the same rendering path as ACF used, so the colour codes and
-        // the hex sequences produced by FormatUtil keep behaving exactly as they do today.
-        plugin.getLang().message(messageKeys, replacements).ifPresent(player::sendMessage);
+        // A component since the texts learned MiniMessage : a gradient written in a language
+        // file reaches the chat as one, and the legacy codes mean exactly what they meant.
+        plugin.getLang().component(messageKeys, replacements).ifPresent(player::sendMessage);
     }
 }
