@@ -97,6 +97,7 @@ public class AuctionsGui extends AbstractGuiWithAuctions {
 
                     // A right click on someone else auction only opens a preview, no need to reserve.
                     if (!auction.getPlayerUUID().equals(player.getUniqueId()) && !isModCanCancel) {
+                        playGuiClick();
                         VisualizationUtils.createVizualisation(plugin, auction, player, Gui.AUCTION);
                         return;
                     }
@@ -143,6 +144,7 @@ public class AuctionsGui extends AbstractGuiWithAuctions {
                             auctions.remove(auction);
 
                             MessageUtil.sendMessage(plugin, player, MessageKeys.REMOVE_AUCTION_SUCCESS, "{item}", FormatUtil.titleItemFormat(a.getItemStack()));
+                            playGuiClick();
                         } catch (Exception exception) {
                             plugin.getLogger().severe(exception.toString());
                         }
@@ -173,6 +175,7 @@ public class AuctionsGui extends AbstractGuiWithAuctions {
                         return;
                     }
 
+                    playGuiClick();
                     AuctionConfirmGui auctionConfirmGui = new AuctionConfirmGui(plugin, player, page, auction);
                     auctionConfirmGui.initialize();
                 }

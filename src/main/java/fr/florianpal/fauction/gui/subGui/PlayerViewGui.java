@@ -129,6 +129,7 @@ public class PlayerViewGui extends AbstractGuiWithAuctions {
                             Bukkit.getPluginManager().callEvent(new AuctionCancelEvent(player, a, CancelReason.PLAYER));
 
                             MessageUtil.sendMessage(plugin, player, MessageKeys.REMOVE_AUCTION_SUCCESS, "{item}", FormatUtil.titleItemFormat(a.getItemStack()));
+                            playGuiClick();
                         } catch (Exception exception) {
                             plugin.getLogger().severe(exception.toString());
                         }

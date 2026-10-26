@@ -59,6 +59,10 @@ public enum MessageKeys {
 
     SLOTS_INFO_STORAGE,
 
+    SOUNDS_ON,
+
+    SOUNDS_OFF,
+
     MIGRATE,
 
     DATABASEERROR;

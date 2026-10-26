@@ -14,6 +14,7 @@ fauction:
   migrate_help_description: "Migrate to another version."
   clear_players_help_description: "Wipe the player auction data and the free-commission counters"
   slots_info_help_description: "Show the auction slot and expired-storage permissions of a player"
+  sounds_help_description: "Turn your auction sounds on or off"
 
   buy_auction_success: "You just bought {item} for {price}."
   buy_auction_target_success: "The player {player} bought your item {item} at the price of {price}."
@@ -55,6 +56,8 @@ fauction:
   slots_info_bonus: "&7Permission bonus: &f+{extra} &8({permissions})"
   slots_info_total: "&7Available slots: &f{free}&7/&f{total} &8(active lots: {active})"
   slots_info_storage: "&7Expired-item storage: &f{days} days &8(base {base} + bonus {bonus}: {permissions})"
+  sounds_on: "Auction sounds are now on."
+  sounds_off: "Auction sounds are now off."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

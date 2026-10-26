@@ -14,6 +14,7 @@ permissions:
       fauction.sell: true
       fauction.expire: true
       fauction.search: true
+      fauction.sounds: true
   fauction.list:
     description: Open the auction gui
     default: true
@@ -25,6 +26,9 @@ permissions:
     default: true
   fauction.search:
     description: Search the auctions by material
+    default: true
+  fauction.sounds:
+    description: Turn your own auction sounds on or off (/ah sounds on|off)
     default: true
   fauction.bypass.spam:
     description: Ignore the anti packet spamming protection

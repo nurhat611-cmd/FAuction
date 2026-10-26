@@ -87,6 +87,8 @@ class CommandRegistrationTest extends FAuctionTestBase {
         assertTrue(paths.contains("ah clear data players"), paths.toString());
         assertTrue(paths.contains("ah admin purge players"), paths.toString());
         assertTrue(paths.contains("ah admin slots playerName"), paths.toString());
+        assertTrue(paths.contains("ah sounds"), paths.toString());
+        assertTrue(paths.contains("ah sounds state"), paths.toString());
         assertTrue(paths.contains("ah admin migrate migrateVersion"), paths.toString());
     }
 

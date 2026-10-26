@@ -125,6 +125,7 @@ public class ExpireGui extends AbstractGuiWithAuctions {
                         Bukkit.getPluginManager().callEvent(new ExpireRemoveEvent(player, a));
 
                         MessageUtil.sendMessage(plugin, player, MessageKeys.REMOVE_EXPIRE_SUCCESS);
+                        plugin.getSoundManager().playExpireClaim(player);
 
                         FAuction.newChain(player).asyncFirst(() -> expireCommandManager.getExpires(player.getUniqueId())).syncLast(expires -> {
                             ExpireGui gui = new ExpireGui(plugin, player, expires, 1, category, sort);

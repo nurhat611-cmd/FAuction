@@ -1,0 +1,8 @@
+{
+  "custom.cashregister": {
+    "category": "master",
+    "sounds": [
+      "custom:cashregister"
+    ]
+  }
+}

@@ -224,6 +224,7 @@ public class AuctionConfirmGui extends AbstractGuiWithAuctions {
         boolean isBaseBlock = abstractGuiWithAuctionsConfig.getBaseBlocks().values().stream().anyMatch(b -> b == e.getRawSlot());
         if (isBaseBlock) {
 
+            playGuiClick();
             VisualizationUtils.createVizualisation(plugin, auction, player, Gui.CONFIRM);
             return;
         }
@@ -234,6 +235,7 @@ public class AuctionConfirmGui extends AbstractGuiWithAuctions {
                 Confirm confirm = confirmList.get(e.getRawSlot());
                 if (!confirm.isValue()) {
                     MessageUtil.sendMessage(plugin, player, MessageKeys.BUY_AUCTION_CANCELLED);
+                    playGuiClick();
                     FAuction.newChain(player).asyncFirst(auctionCommandManager::getAuctions).syncLast(auctions -> {
                         AuctionsGui gui = new AuctionsGui(plugin, player, auctions, 1, null, null);
                         gui.initialize();
@@ -290,6 +292,8 @@ public class AuctionConfirmGui extends AbstractGuiWithAuctions {
                     if (offlinePlayer.isOnline()) {
                         MessageUtil.sendMessage(plugin, offlinePlayer.getPlayer(), MessageKeys.BUY_AUCTION_TARGET_SUCCESS, "{player}", player.getName(), "{item}", FormatUtil.titleItemFormat(auctionGood.getItemStack()), "{price}", df.format(auctionGood.getPrice()));
                     }
+
+                    plugin.getSoundManager().playBuy(player, offlinePlayer.isOnline() ? offlinePlayer.getPlayer() : null);
 
                     historicCommandManager.addHistoric(auctionGood, player.getUniqueId(), player.getName());
 

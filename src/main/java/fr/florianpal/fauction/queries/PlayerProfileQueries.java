@@ -5,9 +5,11 @@ import fr.florianpal.fauction.enums.SQLType;
 import fr.florianpal.fauction.managers.DatabaseManager;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.UUID;
 
 /**
@@ -26,11 +28,15 @@ public class PlayerProfileQueries implements IDatabaseTable {
     private final DatabaseManager databaseManager;
 
     private static final String GET_USED_FREE_LISTINGS = "SELECT usedFreeListings FROM fa_player_profiles WHERE playerUuid=?";
-    private static final String ADD_PROFILE = "INSERT INTO fa_player_profiles (playerUuid, playerName, usedFreeListings) VALUES(?,?,?)";
+    private static final String GET_SOUNDS_ENABLED = "SELECT soundsEnabled FROM fa_player_profiles WHERE playerUuid=?";
+    private static final String UPDATE_SOUNDS_ENABLED = "UPDATE fa_player_profiles SET playerName=?, soundsEnabled=? WHERE playerUuid=?";
+    private static final String ADD_PROFILE = "INSERT INTO fa_player_profiles (playerUuid, playerName, usedFreeListings, soundsEnabled) VALUES(?,?,?,?)";
     private static final String INCREMENT_USED_FREE_LISTINGS = "UPDATE fa_player_profiles SET playerName=?, usedFreeListings=usedFreeListings+1 WHERE playerUuid=?";
     private static final String DELETE_ALL = "DELETE FROM fa_player_profiles";
 
     private String parameters = "DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
+
+    private String trueLiteral = "1";
 
     public PlayerProfileQueries(FAuction plugin) {
         this.plugin = plugin;
@@ -38,6 +44,9 @@ public class PlayerProfileQueries implements IDatabaseTable {
         if (plugin.getConfigurationManager().getDatabase().getSqlType() == SQLType.SQLite
                 || plugin.getConfigurationManager().getDatabase().getSqlType() == SQLType.PostgreSQL) {
             parameters = "";
+        }
+        if (plugin.getConfigurationManager().getDatabase().getSqlType() == SQLType.PostgreSQL) {
+            trueLiteral = "TRUE";
         }
     }
 
@@ -86,6 +95,7 @@ public class PlayerProfileQueries implements IDatabaseTable {
                 statement.setString(1, playerUuid.toString());
                 statement.setString(2, playerName);
                 statement.setInt(3, 1);
+                statement.setBoolean(4, true);
                 statement.executeUpdate();
                 return 1;
             }
@@ -93,6 +103,77 @@ public class PlayerProfileQueries implements IDatabaseTable {
             plugin.getLogger().severe("Error when incrementing the free-listing counter of " + playerName + ". Error " + e.getMessage());
         }
         return 0;
+    }
+
+    /**
+     * Whether the auction sounds are on for this player ({@code /ah sounds on|off}). True when
+     * the player has no row yet : sounds are on until switched off.
+     */
+    public boolean getSoundsEnabled(UUID playerUuid) {
+        try (Connection connection = databaseManager.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(GET_SOUNDS_ENABLED)) {
+                statement.setString(1, playerUuid.toString());
+                try (ResultSet result = statement.executeQuery()) {
+                    return !result.next() || result.getBoolean(1);
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error when reading the sound switch of " + playerUuid + ". Error " + e.getMessage());
+        }
+        return true;
+    }
+
+    /**
+     * Stores the {@code /ah sounds on|off} switch, creating the row of a player who flips it
+     * before ever spending a free listing. Same update-then-insert upsert as the counter.
+     */
+    public void setSoundsEnabled(UUID playerUuid, String playerName, boolean enabled) {
+        try (Connection connection = databaseManager.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(UPDATE_SOUNDS_ENABLED)) {
+                statement.setString(1, playerName);
+                statement.setBoolean(2, enabled);
+                statement.setString(3, playerUuid.toString());
+                if (statement.executeUpdate() > 0) {
+                    return;
+                }
+            }
+            try (PreparedStatement statement = connection.prepareStatement(ADD_PROFILE)) {
+                statement.setString(1, playerUuid.toString());
+                statement.setString(2, playerName);
+                statement.setInt(3, 0);
+                statement.setBoolean(4, enabled);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error when saving the sound switch of " + playerName + ". Error " + e.getMessage());
+        }
+    }
+
+    /**
+     * Adds the {@code soundsEnabled} column to a profile table created before the sounds
+     * existed. Same reasoning as {@code AuctionQueries.ensureCommissionFreeColumn()} : the
+     * selects read the column, so it has to be there before the first read, and a fresh table
+     * already has it.
+     */
+    public void ensureSoundsEnabledColumn() {
+        try (Connection connection = databaseManager.getConnection()) {
+            if (columnExists(connection, "soundsEnabled") || columnExists(connection, "soundsenabled")) {
+                return;
+            }
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("ALTER TABLE fa_player_profiles ADD COLUMN soundsEnabled BOOLEAN NOT NULL DEFAULT " + trueLiteral);
+            }
+            plugin.getLogger().info("The fa_player_profiles table gained its soundsEnabled column !");
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error when adding the soundsEnabled column to the fa_player_profiles table. Error " + e.getMessage());
+        }
+    }
+
+    private boolean columnExists(Connection connection, String columnName) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        try (ResultSet columns = metaData.getColumns(null, null, "fa_player_profiles", columnName)) {
+            return columns.next();
+        }
     }
 
     /**
@@ -113,7 +194,8 @@ public class PlayerProfileQueries implements IDatabaseTable {
         return new String[]{"fa_player_profiles",
                 "`playerUuid` VARCHAR(36) NOT NULL PRIMARY KEY, " +
                         "`playerName` VARCHAR(36) NOT NULL, " +
-                        "`usedFreeListings` INT NOT NULL",
+                        "`usedFreeListings` INT NOT NULL, " +
+                        "`soundsEnabled` BOOLEAN NOT NULL DEFAULT " + trueLiteral,
                 parameters
         };
     }

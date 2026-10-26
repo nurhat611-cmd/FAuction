@@ -14,6 +14,7 @@ import fr.florianpal.fauction.queries.AuctionQueries;
 import fr.florianpal.fauction.queries.CurrencyPendingQueries;
 import fr.florianpal.fauction.queries.ExpireQueries;
 import fr.florianpal.fauction.queries.HistoricQueries;
+import fr.florianpal.fauction.listeners.PlayerJoinListener;
 import fr.florianpal.fauction.queries.PlayerProfileQueries;
 import fr.florianpal.fauction.schedules.CacheSchedule;
 import fr.florianpal.fauction.schedules.CurrencyScheduler;
@@ -93,6 +94,9 @@ public class FAuction extends JavaPlugin {
 
     @Getter
     private ExpireStorageManager expireStorageManager;
+
+    @Getter
+    private SoundManager soundManager;
 
     @Getter
     private TransfertManager transfertManager;
@@ -189,6 +193,7 @@ public class FAuction extends JavaPlugin {
         // Databases created before the commission existed have no flag on their lots, and every
         // read expects it : the column goes in before any manager loads the market.
         auctionQueries.ensureCommissionFreeColumn();
+        playerProfileQueries.ensureSoundsEnabledColumn();
 
         auctionCommandManager = new AuctionCommandManager(this);
         expireCommandManager = new ExpireCommandManager(this);
@@ -198,9 +203,11 @@ public class FAuction extends JavaPlugin {
         claimManager = new ClaimManager();
         commissionManager = new CommissionManager(this);
         expireStorageManager = new ExpireStorageManager(this);
+        soundManager = new SoundManager(this);
         transfertManager = new TransfertManager(this);
 
         commandManager.register(new AuctionCommand(this));
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new FPlaceholderExpansion(this).register();

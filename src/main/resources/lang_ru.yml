@@ -14,6 +14,7 @@ fauction:
   migrate_help_description: "Мигрировать на другую версию."
   clear_players_help_description: "Очистить данные аукциона игроков и счётчики лотов без комиссии"
   slots_info_help_description: "Показать права игрока на слоты и хранение просроченных товаров"
+  sounds_help_description: "Включить или выключить свои звуки аукциона"
 
   buy_auction_success: "Вы успешно купили {item} за {price}."
   buy_auction_target_success: "Игрок {player} купил ваш предмет {item} за {price}."
@@ -55,6 +56,8 @@ fauction:
   slots_info_bonus: "&7Бонус от прав: &f+{extra} &8({permissions})"
   slots_info_total: "&7Доступно слотов: &f{free}&7/&f{total} &8(активных лотов: {active})"
   slots_info_storage: "&7Хранение просроченных: &f{days} дн. &8(база {base} + бонус {bonus}: {permissions})"
+  sounds_on: "Звуки аукциона включены."
+  sounds_off: "Звуки аукциона выключены."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

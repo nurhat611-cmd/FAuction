@@ -86,6 +86,8 @@ public class AuctionCommand {
 
     static final String ONLINE_PLAYER_SUGGESTIONS = "fauction:online_players";
 
+    static final String SOUND_STATE_SUGGESTIONS = "fauction:sound_states";
+
     private final FAuction plugin;
 
     private final AuctionCommandManager auctionCommandManager;
@@ -324,6 +326,8 @@ public class AuctionCommand {
                 } else if (feePaid.get()) {
                     MessageUtil.sendMessage(plugin, playerSender, MessageKeys.COMMISSION_PAID, "{fee}", df.format(feeToPay), "{percent}", df.format(commissionManager.getPercent()));
                 }
+
+                plugin.getSoundManager().playSell(playerSender);
             }, added -> {
 
                 // Same reason as above : the hash must not survive the round trip, and it is no
@@ -485,6 +489,40 @@ public class AuctionCommand {
             }
         }
         return true;
+    }
+
+    @Command(ROOT + SPACE + "sounds")
+    @Permission("fauction.sounds")
+    @CommandDescription("{@@fauction.sounds_help_description}")
+    public void onSoundsStatus(Player playerSender) {
+        MessageUtil.sendMessage(plugin, playerSender,
+                plugin.getSoundManager().isSoundsEnabled(playerSender) ? MessageKeys.SOUNDS_ON : MessageKeys.SOUNDS_OFF);
+    }
+
+    @Command(ROOT + SPACE + "sounds <state>")
+    @Permission("fauction.sounds")
+    @CommandDescription("{@@fauction.sounds_help_description}")
+    public void onSounds(Player playerSender, @Argument(value = "state", suggestions = SOUND_STATE_SUGGESTIONS) String state) {
+
+        Boolean enabled = switch (state.toLowerCase(Locale.ROOT)) {
+            case "on", "true", "enable", "enabled" -> Boolean.TRUE;
+            case "off", "false", "disable", "disabled" -> Boolean.FALSE;
+            default -> null;
+        };
+
+        // An unknown state changes nothing and simply reports where the switch stands.
+        if (enabled == null) {
+            onSoundsStatus(playerSender);
+            return;
+        }
+
+        plugin.getSoundManager().setSoundsEnabled(playerSender, enabled);
+        MessageUtil.sendMessage(plugin, playerSender, enabled ? MessageKeys.SOUNDS_ON : MessageKeys.SOUNDS_OFF);
+    }
+
+    @Suggestions(SOUND_STATE_SUGGESTIONS)
+    public List<String> soundStateSuggestions() {
+        return List.of("on", "off");
     }
 
     @Command(ROOT + SPACE + EXPIRE)

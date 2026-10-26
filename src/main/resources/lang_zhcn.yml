@@ -14,6 +14,7 @@ fauction:
   migrate_help_description: "迁移至其他版本."
   clear_players_help_description: "清除玩家拍卖数据和免佣金计数"
   slots_info_help_description: "显示玩家的拍卖槽位和过期物品保存权限"
+  sounds_help_description: "打开或关闭你的拍卖音效"
 
   buy_auction_success: "你购买了一个物品."
   buy_auction_target_success: "The player {player} bought your item {item} at the price of {price}."
@@ -67,6 +68,8 @@ fauction:
   slots_info_bonus: "&7权限加成: &f+{extra} &8({permissions})"
   slots_info_total: "&7可用槽位: &f{free}&7/&f{total} &8(在售: {active})"
   slots_info_storage: "&7过期物品保存: &f{days} 天 &8(基础 {base} + 加成 {bonus}: {permissions})"
+  sounds_on: "拍卖音效已开启."
+  sounds_off: "拍卖音效已关闭."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

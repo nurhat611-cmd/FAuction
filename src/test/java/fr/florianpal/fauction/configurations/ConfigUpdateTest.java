@@ -50,6 +50,8 @@ class ConfigUpdateTest {
         assertEquals(List.of("sell"), updated.getStringList("commands.sell"));
         assertEquals("14", String.valueOf(updated.get("version")));
         assertEquals(3, updated.getInt("expiration.expiredStorageDays"));
+        assertEquals("ENTITY_ITEM_PICKUP", updated.getString("sounds.sell.name"));
+        assertEquals("custom.cashregister", updated.getString("sounds.buy.custom"));
         assertTrue(updated.getBoolean("commission.enabled"));
         assertEquals(7.0, updated.getDouble("commission.percent"));
         assertEquals("LIFETIME", updated.getString("commission.free-quota-mode"));

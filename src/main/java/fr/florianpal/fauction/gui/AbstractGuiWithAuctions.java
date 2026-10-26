@@ -285,6 +285,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         boolean isPrevious = abstractGuiWithAuctionsConfig.getPreviousBlocks().stream().anyMatch(b -> b.getIndex() == e.getRawSlot() && this.page > 1);
         if (isPrevious) {
 
+            playGuiClick();
             previousAction();
             return true;
         }
@@ -292,6 +293,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         boolean isNext = abstractGuiWithAuctionsConfig.getNextBlocks().stream().anyMatch(next -> e.getRawSlot() == next.getIndex() && ((this.abstractGuiWithAuctionsConfig.getBaseBlocks().size() * this.page) - this.abstractGuiWithAuctionsConfig.getBaseBlocks().size() < auctions.size() - this.abstractGuiWithAuctionsConfig.getBaseBlocks().size()));
         if (isNext) {
 
+            playGuiClick();
             nextAction();
             return true;
         }
@@ -300,6 +302,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         if (isCategory) {
 
             Category nextCategory = plugin.getConfigurationManager().getCategoriesConfig().getNext(category);
+            playGuiClick();
             categoryAction(nextCategory);
             return true;
         }
@@ -308,6 +311,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         if (isSorting) {
 
             Sort nextSort = plugin.getConfigurationManager().getSortConfig().getNext(sort);
+            playGuiClick();
             sortingAction(nextSort);
             return true;
         }
