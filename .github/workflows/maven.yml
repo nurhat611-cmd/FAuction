@@ -30,6 +30,12 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
+      - name: Temporary diagnostics
+        if: failure()
+        run: |
+          mvn -B test-compile 2>&1 | grep -E "ERROR.*java" | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+          grep -H -A2 "<failure\|<error" target/surefire-reports/*.xml 2>/dev/null | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+
       - name: Upload the plugin JAR
         uses: actions/upload-artifact@v7
         with:
