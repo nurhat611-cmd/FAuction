@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.florianpal</groupId>
+    <artifactId>fauction</artifactId>
+    <version>2.3.0</version>
+    <properties>
+        <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <!--Cloud : cloud-paper/extras follow the cloud-minecraft train, cloud-core/annotations the cloud one-->
+        <cloud.core.version>2.1.0</cloud.core.version>
+        <cloud.paper.version>2.0.1</cloud.paper.version>
+        <cloud.minecraft.version>2.0.1</cloud.minecraft.version>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/florianpal1/fauction</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <version>3.16.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.48</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!-- Resolves ${org.mockito:mockito-core:jar} used by surefire below -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.11.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <!-- Mockito as an agent, it is no longer allowed to attach itself -->
+                    <argLine>-javaagent:${org.mockito:mockito-core:jar}</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.2</version>
+
+                <configuration>
+                    <!-- Cloud resolves its parsers, handlers and suggestions by reflection, so the
+                         minimizer prunes classes no direct call references. The breakage would only
+                         show up at runtime, on the path of one precise command. -->
+                    <minimizeJar>false</minimizeJar>
+                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                    <relocations>
+                        <!-- Required by Cloud when it is shaded. -->
+                        <relocation>
+                            <pattern>org.incendo.cloud</pattern>
+                            <shadedPattern>fr.florianpal.fauction.cloud</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>fr.florianpal.fauction.bstats</shadedPattern>
+                        </relocation>
+                        <!-- Required by FoliaLib : it checks at runtime that it was relocated and
+                             warns (conflicts with other plugins bundling it) otherwise. -->
+                        <relocation>
+                            <pattern>com.tcoded.folialib</pattern>
+                            <shadedPattern>fr.florianpal.fauction.folialib</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>module-info.java</exclude>
+                            <exclude>org.codehaus.plexus:*</exclude>
+                            <exclude>org.ow2.asm:*</exclude>
+                            <exclude>org.jdom:*</exclude>
+                            <exclude>org.apache.commons:*</exclude>
+                            <exclude>commons-io:*</exclude>
+                            <exclude>commons-codec:*</exclude>
+                            <exclude>org.vafer:*</exclude>
+                            <exclude>org.slf4j:*</exclude>
+                            <exclude>org.apache.maven.plugins:*</exclude>
+                            <exclude>org.projectlombok:*</exclude>
+                            <exclude>org.vafer:*</exclude>
+                            <exclude>com.sun.istack:*</exclude>
+                            <exclude>org.glassfish.jaxb:*</exclude>
+                            <exclude>org.eclipse.angus:*</exclude>
+                            <exclude>net.bytebuddy:*</exclude>
+                            <exclude>net.kyori:*</exclude>
+                            <exclude>com.google.auto.service:*</exclude>
+                            <exclude>org.apache.maven:*</exclude>
+                            <exclude>org.apache.maven.resolver:*</exclude>
+                            <exclude>com.google.guava:*</exclude>
+                            <exclude>com.google.code.gson:*</exclude>
+                            <exclude>org.joml:*</exclude>
+                            <exclude>org.yaml:*</exclude>
+                            <exclude>it.unimi.dsi:*</exclude>
+                            <exclude>net.md-5:bungeecord-chat:*</exclude>
+                            <exclude>org.jspecify:*</exclude>
+                            <exclude>com.google.errorprone:*</exclude>
+                            <!-- Compile-time annotations only : nothing of them is looked up at
+                                 runtime, and minimizeJar is no longer there to prune them. Cloud's
+                                 own runtime dependency, io.leangen.geantyref, is NOT in this list. -->
+                            <exclude>org.checkerframework:*</exclude>
+                            <exclude>org.jetbrains:*</exclude>
+                            <exclude>org.intellij:*</exclude>
+                            <exclude>org.immutables:*</exclude>
+                            <exclude>org.apiguardian:*</exclude>
+                        </excludes>
+                    </artifactSet>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <!--Paper Repo-->
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <!--TCoded Repo, needed by FoliaLib-->
+        <repository>
+            <id>tcoded</id>
+            <url>https://repo.tcoded.com/releases</url>
+        </repository>
+        <!--Vault Repo-->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <!--Placeholder repo-->
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <!--MLang repo-->
+        <repository>
+            <id>seetch-repo-releases</id>
+            <url>https://repo.seetch.ru/releases</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!--Paper API-->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.48</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--PaperLib API-->
+        <dependency>
+            <groupId>io.papermc</groupId>
+            <artifactId>paperlib</artifactId>
+            <version>1.0.8</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Cloud (command framework) - pinned, Folia-capable-->
+        <dependency>
+            <groupId>org.incendo</groupId>
+            <artifactId>cloud-paper</artifactId>
+            <version>${cloud.paper.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.incendo</groupId>
+            <artifactId>cloud-annotations</artifactId>
+            <version>${cloud.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.incendo</groupId>
+            <artifactId>cloud-minecraft-extras</artifactId>
+            <version>${cloud.minecraft.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.12.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--Hibernate Core-->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>7.4.13.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--Hibernate HikariCP-->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
+            <version>7.4.13.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--HikariCP-->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>7.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--FoliaLib : Paper/Folia-aware scheduling, replaces TaskChain-->
+        <dependency>
+            <groupId>com.tcoded</groupId>
+            <artifactId>FoliaLib</artifactId>
+            <version>0.5.2</version>
+        </dependency>
+        <!--Vault-->
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--LuckPerms-->
+        <dependency>
+            <groupId>net.luckperms</groupId>
+            <artifactId>api</artifactId>
+            <version>5.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--BStats-->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Maven Shade-->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.6.2</version>
+        </dependency>
+        <!--Boosted Yaml-->
+        <dependency>
+            <groupId>dev.dejvokep</groupId>
+            <artifactId>boosted-yaml</artifactId>
+            <version>1.3.7</version>
+        </dependency>
+        <!--MLang-->
+        <dependency>
+            <groupId>me.seetch</groupId>
+            <artifactId>mlang</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <!--JUnit-->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>6.1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <!--MockBukkit-->
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <version>4.116.3</version>
+            <scope>test</scope>
+        </dependency>
+        <!--Mockito-->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.24.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

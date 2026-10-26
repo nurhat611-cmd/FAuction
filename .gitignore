@@ -1,0 +1,9 @@
+# Project exclude paths
+/target/
+
+# IDE
+/.idea/
+*.iml
+
+# Local tooling
+/.claude/

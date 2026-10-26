@@ -1,0 +1,72 @@
+version: 1
+categories:
+    'default':
+      displayName: "All"
+      materials:
+        - ALL
+    'wood':
+      displayName: "Log"
+      materials:
+        - OAK_LOG
+        - SPRUCE_LOG
+        - JUNGLE_LOG
+        - ACACIA_LOG
+        - DARK_OAK_LOG
+    'ore':
+      displayName: "Raw Ore"
+      materials:
+        - RAW_IRON
+        - RAW_COPPER
+        - RAW_GOLD
+    'shulker':
+      displayName: "Shulker"
+      materials:
+        - SHULKER_BOX
+        - BLUE_SHULKER_BOX
+        - BLACK_SHULKER_BOX
+        - BROWN_SHULKER_BOX
+        - CYAN_SHULKER_BOX
+        - GRAY_SHULKER_BOX
+        - GREEN_SHULKER_BOX
+        - LIGHT_BLUE_SHULKER_BOX
+        - LIGHT_GRAY_SHULKER_BOX
+        - LIME_SHULKER_BOX
+        - MAGENTA_SHULKER_BOX
+        - ORANGE_SHULKER_BOX
+        - PINK_SHULKER_BOX
+        - RED_SHULKER_BOX
+        - WHITE_SHULKER_BOX
+        - YELLOW_SHULKER_BOX
+        - PURPLE_SHULKER_BOX
+    'weapons':
+      displayName: "Weapons"
+      materials:
+        - WEAPONS
+    'tools':
+      displayName: "Tools"
+      materials:
+        - TOOLS
+    'armor':
+      displayName: "Armor"
+      materials:
+        - ARMOR
+    'blocks':
+      displayName: "Building Blocks"
+      materials:
+        - BLOCKS
+    'food':
+      displayName: "Food & Drinks"
+      materials:
+        - FOOD
+    'potions':
+      displayName: "Potions"
+      materials:
+        - POTIONS
+    'misc':
+      displayName: "Miscellaneous"
+      materials:
+        - MISC
+    'custom':
+      displayName: "Custom Items"
+      materials:
+        - CUSTOM
