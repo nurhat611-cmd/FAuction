@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -55,8 +56,11 @@ class CompletionVisibilityTest extends FAuctionTestBase {
     void listAndExpireLeaveTheCompletion() {
 
         CommandNode<Object> root = root(register());
-        assertEquals("fauction.list", completionPermission(root, "list"));
-        assertEquals("fauction.expire", completionPermission(root, "expire"));
+
+        // "Contains" : Cloud merges the permissions propagated to a node with anyOf, whose
+        // spelling parenthesises — (fauction.list) — what matters is the permission inside.
+        assertTrue(completionPermission(root, "list").contains("fauction.list"));
+        assertTrue(completionPermission(root, "expire").contains("fauction.expire"));
 
         fr.florianpal.fauction.managers.commandmanagers.CommandManager.hideFromCompletion(
                 root, Set.of("list", "expire"), Permission.of("fauction.tabcomplete"));
@@ -65,9 +69,9 @@ class CompletionVisibilityTest extends FAuctionTestBase {
         assertEquals("fauction.tabcomplete", completionPermission(root, "expire"));
 
         // The trading words keep being proposed to whoever may trade.
-        assertEquals("fauction.sell", completionPermission(root, "sell"));
-        assertEquals("fauction.search", completionPermission(root, "search"));
-        assertEquals("fauction.lookup", completionPermission(root, "lookup"));
+        assertTrue(completionPermission(root, "sell").contains("fauction.sell"));
+        assertTrue(completionPermission(root, "search").contains("fauction.search"));
+        assertTrue(completionPermission(root, "lookup").contains("fauction.lookup"));
     }
 
     private CommandManager<Object> register() {
