@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
 /**
  * What the plugin prepares when a player arrives, and drops when they leave. The profile reads
@@ -28,6 +29,10 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         plugin.getSoundManager().preload(player);
         plugin.getCommissionManager().preload(player.getUniqueId());
+        if (plugin.getResourcePackManager() != null) {
+            // Bedrock players are skipped inside : a Java pack means nothing to their client.
+            plugin.getResourcePackManager().sendTo(player);
+        }
         remindExpiredItems(player);
     }
 
@@ -35,6 +40,20 @@ public class PlayerJoinListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         plugin.getSoundManager().unload(event.getPlayer().getUniqueId());
         plugin.getCommissionManager().unload(event.getPlayer().getUniqueId());
+        if (plugin.getResourcePackManager() != null) {
+            plugin.getResourcePackManager().forget(event.getPlayer().getUniqueId());
+        }
+    }
+
+    /**
+     * The answer of a client to the pack offer : only a loaded pack unlocks the custom purchase
+     * sound, a declined or failed one keeps the player on vanilla.
+     */
+    @EventHandler
+    public void onResourcePackStatus(PlayerResourcePackStatusEvent event) {
+        if (plugin.getResourcePackManager() != null) {
+            plugin.getResourcePackManager().handleStatus(event.getPlayer().getUniqueId(), event.getStatus().name());
+        }
     }
 
     /**

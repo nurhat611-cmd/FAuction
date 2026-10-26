@@ -337,6 +337,43 @@ class GlobalConfigTest {
         assertFalse(config.isUpdateCheckerEnabled());
     }
 
+    @Test
+    @DisplayName("The resource pack runs on the default port when its section is absent")
+    void resourcePackDefaults() {
+
+        GlobalConfig config = new GlobalConfig();
+        config.load(TestConfigs.of(MINIMAL));
+
+        assertTrue(config.isResourcePackEnabled());
+        assertEquals(8765, config.getResourcePackPort());
+        assertEquals("", config.getResourcePackHost());
+        assertFalse(config.isResourcePackRequired());
+    }
+
+    @Test
+    @DisplayName("The resource-pack section is read and an unusable port falls back on 8765")
+    void resourcePackSectionIsRead() {
+
+        GlobalConfig config = new GlobalConfig();
+        config.load(TestConfigs.of("""
+                lang: "ru"
+                resource-pack:
+                  enabled: false
+                  port: 99999
+                  host: " play.example.net "
+                  required: true
+                  prompt: "&6Pack"
+                limitations:
+                  default: 5
+                """));
+
+        assertFalse(config.isResourcePackEnabled());
+        assertEquals(8765, config.getResourcePackPort());
+        assertEquals("play.example.net", config.getResourcePackHost());
+        assertTrue(config.isResourcePackRequired());
+        assertEquals("&6Pack", config.getResourcePackPrompt());
+    }
+
     private void assertLimit(double burst, double perSecond, SpamLimit limit) {
         assertEquals(burst, limit.burst(), "burst");
         assertEquals(perSecond, limit.perSecond(), "perSecond");

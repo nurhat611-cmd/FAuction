@@ -4,6 +4,7 @@ import fr.florianpal.fauction.FAuction;
 import fr.florianpal.fauction.configurations.GlobalConfig;
 import fr.florianpal.fauction.objects.SoundSetting;
 import fr.florianpal.fauction.queries.PlayerProfileQueries;
+import fr.florianpal.fauction.utils.BedrockUtil;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
@@ -28,6 +29,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * sound covers every press on a gui button or item instead.
  */
 public class SoundManager {
+
+    /**
+     * The last-resort purchase sound, used when every configured name is a resource-pack sound
+     * the player cannot hear. Vanilla, always resolvable, and thematically a trade.
+     */
+    static final String BUY_FALLBACK_SOUND = "ENTITY_VILLAGER_TRADE";
 
     private final FAuction plugin;
 
@@ -137,13 +144,52 @@ public class SoundManager {
         if (config == null || config.getBuySound() == null) {
             return;
         }
-        SoundSetting setting = config.getBuySound();
-        String custom = config.getBuyCustomSound();
-        String name = custom != null && !custom.isBlank() ? custom.trim() : setting.name();
-        playNamed(buyer, name, setting);
+        playBuyTo(buyer, config);
         if (seller != null && !seller.equals(buyer)) {
-            playNamed(seller, name, setting);
+            playBuyTo(seller, config);
         }
+    }
+
+    /**
+     * The purchase sound of one player. Who hears the custom register is decided per player, not
+     * per purchase : a Bedrock player never has the Java pack, and a Java player who declined it
+     * (or whose download failed) would only hear silence — both get the vanilla sound.
+     */
+    private void playBuyTo(Player player, GlobalConfig config) {
+        if (player == null) {
+            return;
+        }
+        SoundSetting setting = config.getBuySound();
+        String name = buySoundName(customSoundAllowed(player), config.getBuyCustomSound(),
+                setting.name(), resolveVanilla(setting.name()) != null);
+        playNamed(player, name, setting);
+    }
+
+    /**
+     * The sound one player hears for a purchase. The configured custom sound wins where it can
+     * be heard ; where it cannot, the configured vanilla name answers, or the hard-coded villager
+     * trade when that name is itself a resource-pack sound — silence is the one answer a purchase
+     * never gives.
+     */
+    static String buySoundName(boolean customAllowed, String custom, String configuredName,
+                               boolean configuredNameIsVanilla) {
+        if (custom != null && !custom.isBlank()) {
+            if (customAllowed) {
+                return custom.trim();
+            }
+            return configuredNameIsVanilla ? configuredName : BUY_FALLBACK_SOUND;
+        }
+        if (!customAllowed && !configuredNameIsVanilla) {
+            return BUY_FALLBACK_SOUND;
+        }
+        return configuredName;
+    }
+
+    private boolean customSoundAllowed(Player player) {
+        ResourcePackManager packs = plugin.getResourcePackManager();
+        boolean managed = packs != null && packs.isEnabled();
+        boolean loaded = packs != null && packs.hasLoadedPack(player.getUniqueId());
+        return ResourcePackManager.shouldUseCustomSound(BedrockUtil.isBedrockPlayer(player), managed, loaded);
     }
 
     public void play(Player player, SoundSetting setting) {

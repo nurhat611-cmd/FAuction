@@ -99,6 +99,9 @@ public class FAuction extends JavaPlugin {
     private SoundManager soundManager;
 
     @Getter
+    private ResourcePackManager resourcePackManager;
+
+    @Getter
     private TransfertManager transfertManager;
 
     @Getter
@@ -204,10 +207,12 @@ public class FAuction extends JavaPlugin {
         commissionManager = new CommissionManager(this);
         expireStorageManager = new ExpireStorageManager(this);
         soundManager = new SoundManager(this);
+        resourcePackManager = new ResourcePackManager(this);
         transfertManager = new TransfertManager(this);
 
         commandManager.register(new AuctionCommand(this));
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        resourcePackManager.start();
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new FPlaceholderExpansion(this).register();
@@ -256,6 +261,10 @@ public class FAuction extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+        if (resourcePackManager != null) {
+            resourcePackManager.stop();
+        }
 
         // onEnable can call disablePlugin() before databaseManager is assigned (config or database
         // initialization failure) ; this runs synchronously as part of that call. configurationManager
@@ -336,6 +345,10 @@ public class FAuction extends JavaPlugin {
 
         configurationManager.reload(this);
         lang.load(this);
+        if (resourcePackManager != null) {
+            // A new port or host only takes by re-listening ; start() stops the old server first.
+            resourcePackManager.start();
+        }
         updateCheckerManager.checkAsync(0);
 
         boolean commandNamesChanged = !namesBefore.equals(configurationManager.getCommandsConfig().snapshot());
