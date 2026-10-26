@@ -13,56 +13,6 @@ gui:
     - "&5Lore :"
     - "{lore}"
 block:
-  '0':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '1':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '2':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '3':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '4':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '5':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '6':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '7':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '8':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '9':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '10':
     utility: auction
   '11':
@@ -77,16 +27,6 @@ block:
     utility: auction
   '16':
     utility: auction
-  '17':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '18':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '19':
     utility: auction
   '20':
@@ -101,16 +41,6 @@ block:
     utility: auction
   '25':
     utility: auction
-  '26':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '27':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '28':
     utility: auction
   '29':
@@ -125,16 +55,6 @@ block:
     utility: auction
   '34':
     utility: auction
-  '35':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
-  '36':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '37':
     utility: auction
   '38':
@@ -149,11 +69,6 @@ block:
     utility: auction
   '43':
     utility: auction
-  '44':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
   '45':
     utility: expireGui
     material: CHEST_MINECART

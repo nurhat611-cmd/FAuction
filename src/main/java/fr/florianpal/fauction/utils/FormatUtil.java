@@ -4,7 +4,6 @@ import fr.florianpal.fauction.FAuction;
 import me.seetch.mlang.MLang;
 import me.seetch.mlang.TranslationKeyGenerator;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -67,17 +66,40 @@ public class FormatUtil {
         return legacyFormat(msg);
     }
 
-    private static String legacyFormat(String msg) {
-        Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+    private static final Pattern HEX_COLOUR = Pattern.compile("#[a-fA-F0-9]{6}");
 
-        Matcher match = pattern.matcher(msg);
-        while (match.find()) {
-            String color = msg.substring(match.start(), match.end());
-            msg = msg.replace(color, ChatColor.of(color) + "");
-            match = pattern.matcher(msg);
+    private static final String LEGACY_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx";
+
+    /**
+     * The historical spelling, kept byte for byte but written out by hand : the hex colours in
+     * the {@code §x§R§R§G§G§B§B} sequence, then the {@code &} codes turned into {@code §} ones.
+     * This is exactly what Bungee's {@code ChatColor} produced (the hex digits keep the case
+     * they were written with, the single-letter codes are lower-cased) — without depending on it, the whole plugin now speaks Adventure.
+     */
+    private static String legacyFormat(String msg) {
+        if (msg == null) {
+            return null;
         }
 
-        return ChatColor.translateAlternateColorCodes('&', msg);
+        Matcher hex = HEX_COLOUR.matcher(msg);
+        StringBuilder out = new StringBuilder();
+        while (hex.find()) {
+            StringBuilder sequence = new StringBuilder("§x");
+            for (char digit : hex.group().substring(1).toCharArray()) {
+                sequence.append('§').append(digit);
+            }
+            hex.appendReplacement(out, Matcher.quoteReplacement(sequence.toString()));
+        }
+        hex.appendTail(out);
+
+        char[] chars = out.toString().toCharArray();
+        for (int i = 0; i < chars.length - 1; i++) {
+            if (chars[i] == '&' && LEGACY_CODES.indexOf(chars[i + 1]) > -1) {
+                chars[i] = '§';
+                chars[i + 1] = Character.toLowerCase(chars[i + 1]);
+            }
+        }
+        return new String(chars);
     }
 
     public static String durationFormat(String format, Duration duration) {

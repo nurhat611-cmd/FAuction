@@ -68,7 +68,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         } else {
             title = title.replace("{TotalPage}", "1");
         }
-        this.inv = Bukkit.createInventory(this, abstractGuiWithAuctionsConfig.getSize(), FormatUtil.format(title));
+        this.inv = Bukkit.createInventory(this, abstractGuiWithAuctionsConfig.getSize(), FormatUtil.component(title));
     }
 
     protected void initBarrier() {

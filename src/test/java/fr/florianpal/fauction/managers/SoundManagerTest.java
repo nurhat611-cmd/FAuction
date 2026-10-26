@@ -104,6 +104,54 @@ class SoundManagerTest extends FAuctionTestBase {
         verify(player).playSound(any(Location.class), eq(Sound.ENTITY_ITEM_PICKUP), eq(2.0f), eq(1.0f));
     }
 
+    @Test
+    @DisplayName("Who hears what on a purchase: the custom sound only where it can be heard")
+    void buySoundNameMatrix() {
+        // A custom sound is configured.
+        assertEquals("custom.cashregister",
+                SoundManager.buySoundName(true, "custom.cashregister", "ENTITY_VILLAGER_TRADE", true));
+        assertEquals("ENTITY_VILLAGER_TRADE",
+                SoundManager.buySoundName(false, "custom.cashregister", "ENTITY_VILLAGER_TRADE", true));
+        // The vanilla slot itself holds a pack sound : the hard-coded trade is the last resort.
+        assertEquals("ENTITY_VILLAGER_TRADE",
+                SoundManager.buySoundName(false, "custom.cashregister", "custom.other", false));
+        // No custom sound : the configured one answers when it can be heard.
+        assertEquals("custom.other", SoundManager.buySoundName(true, "", "custom.other", false));
+        assertEquals("ENTITY_VILLAGER_TRADE", SoundManager.buySoundName(false, "", "custom.other", false));
+        assertEquals("ENTITY_ITEM_PICKUP", SoundManager.buySoundName(false, "", "ENTITY_ITEM_PICKUP", true));
+    }
+
+    @Test
+    @DisplayName("A Bedrock buyer hears the villager trade even with a custom sound configured")
+    void bedrockFallsBackOnVanilla() {
+        when(globalConfig.getBuySound()).thenReturn(new SoundSetting("ENTITY_VILLAGER_TRADE", 0.5, 1.0));
+        when(globalConfig.getBuyCustomSound()).thenReturn("custom.cashregister");
+        Player buyer = soundPlayer(UUID.fromString("00000000-0000-0000-0009-0000000000be"));
+
+        soundManager.playBuy(buyer, null);
+
+        verify(buyer).playSound(any(Location.class), eq(Sound.ENTITY_VILLAGER_TRADE), eq(0.5f), eq(1.0f));
+    }
+
+    @Test
+    @DisplayName("Without the served pack loaded the register falls back on vanilla, per player")
+    void packNotLoadedFallsBackPerPlayer() {
+        ResourcePackManager packs = mock(ResourcePackManager.class);
+        when(packs.isEnabled()).thenReturn(true);
+        when(packs.hasLoadedPack(BUYER)).thenReturn(false);
+        when(packs.hasLoadedPack(SELLER)).thenReturn(true);
+        when(plugin.getResourcePackManager()).thenReturn(packs);
+        when(globalConfig.getBuySound()).thenReturn(new SoundSetting("ENTITY_VILLAGER_TRADE", 0.5, 1.0));
+        when(globalConfig.getBuyCustomSound()).thenReturn("custom.cashregister");
+        Player buyer = soundPlayer(BUYER);
+        Player seller = soundPlayer(SELLER);
+
+        soundManager.playBuy(buyer, seller);
+
+        verify(buyer).playSound(any(Location.class), eq(Sound.ENTITY_VILLAGER_TRADE), eq(0.5f), eq(1.0f));
+        verify(seller).playSound(any(Location.class), eq("custom.cashregister"), eq(SoundCategory.MASTER), eq(0.5f), eq(1.0f));
+    }
+
     private Player soundPlayer(UUID uuid) {
         Player player = mock(Player.class);
         when(player.getUniqueId()).thenReturn(uuid);

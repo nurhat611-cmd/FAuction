@@ -166,11 +166,13 @@ public class AuctionsGui extends AbstractGuiWithAuctions {
                     }).execute(() -> plugin.getClaimManager().release(ClaimType.AUCTION, auctionId, auctionClaim));
                 } else if (e.isLeftClick()) {
                     if (auction.getPlayerUUID().equals(player.getUniqueId())) {
+                        playGuiClick();
                         MessageUtil.sendMessage(plugin, player, MessageKeys.BUY_YOUR_ITEM);
                         return;
                     }
 
                     if (!CurrencyUtil.haveCurrency(plugin, player, globalConfig.getCurrencyType(), auction.getPrice())) {
+                        playGuiClick();
                         MessageUtil.sendMessage(plugin, player, MessageKeys.NO_HAVE_MONEY);
                         return;
                     }

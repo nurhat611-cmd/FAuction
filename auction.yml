@@ -93,52 +93,6 @@ block:
     utility: auction
   '35':
     utility: auction
-  # ---- Разделитель: серые стеклянные панели (слоты 36-44) ----
-  '36':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '37':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '38':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '39':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '40':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '41':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '42':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '43':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-  '44':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
   '45':
     utility: player
     material: ENDER_CHEST

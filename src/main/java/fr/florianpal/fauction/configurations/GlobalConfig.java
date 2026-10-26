@@ -96,6 +96,16 @@ public class GlobalConfig {
 
     private SoundSetting guiClickSound = new SoundSetting("UI_BUTTON_CLICK", 0.5, 1.0);
 
+    private boolean resourcePackEnabled = true;
+
+    private int resourcePackPort = 8765;
+
+    private String resourcePackHost = "";
+
+    private boolean resourcePackRequired = false;
+
+    private String resourcePackPrompt = "&6Звуковой пак аукциона (касса при покупке)";
+
     public void load(YamlDocument config) {
         lang = config.getString("lang");
 
@@ -124,6 +134,16 @@ public class GlobalConfig {
         buySound = readSound(config, "sounds.buy", buySound);
         buyCustomSound = config.getString("sounds.buy.custom", buyCustomSound);
         guiClickSound = readSound(config, "sounds.guiClick", guiClickSound);
+
+        resourcePackEnabled = config.getBoolean("resource-pack.enabled", true);
+        // A port outside 1-65535 cannot be listened on : a typo falls back on the default
+        // instead of taking the pack server down with it.
+        int packPort = config.getInt("resource-pack.port", 8765);
+        resourcePackPort = packPort >= 1 && packPort <= 65535 ? packPort : 8765;
+        resourcePackHost = config.getString("resource-pack.host", "");
+        resourcePackHost = resourcePackHost != null ? resourcePackHost.trim() : "";
+        resourcePackRequired = config.getBoolean("resource-pack.required", false);
+        resourcePackPrompt = config.getString("resource-pack.prompt", resourcePackPrompt);
 
         orderBy = config.getString("orderBy");
         dateFormat = config.getString("dateFormat");
