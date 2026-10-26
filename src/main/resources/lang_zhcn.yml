@@ -74,6 +74,7 @@ fauction:
   lookup_not_found: "&c玩家 &6{player}&c 从未在本服务器游玩过."
   lookup_empty: "&7{player} 目前没有任何在售物品."
   sell_invalid_amount: "&c无法出售 {amount} 个: 你手中只有 {max} 个."
+  expire_reminder: "&e你有 &6{count}&e 件过期物品待领取: &6/ah expire"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

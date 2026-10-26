@@ -7,7 +7,7 @@ version: 1
 gui:
   size: 54                      # Размер инвентаря (54 слота – 6 рядов)
   type: CHEST                   # Тип контейнера (CHEST)
-  name: "Аукцион {Page}/{TotalPage}"  # Заголовок окна
+  name: "Аукцион &8>> &f{Page}/{TotalPage}"  # Заголовок окна
   title: "&eПредмет: &6{ItemName}"    # Заголовок над предметом
   replaceTitle: false           # Заменять ли стандартный заголовок
   hideFlag: false               # Скрывать ли флаги
@@ -20,59 +20,27 @@ gui:
 
 # ===== ПОЛНОЕ РАСПОЛОЖЕНИЕ ЭЛЕМЕНТОВ (ВСЕ СЛОТЫ 0-53) =====
 block:
-  # ---- 1-й ряд (слоты 0-8) ----
+  # ---- Лоты: 4 ряда (слоты 0-35) ----
   '0':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '1':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '2':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '3':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '4':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '5':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '6':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '7':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '8':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-
-  # ---- 2-й ряд (слоты 9-17) ----
+    utility: auction
   '9':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '10':
     utility: auction
   '11':
@@ -88,17 +56,9 @@ block:
   '16':
     utility: auction
   '17':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-
-  # ---- 3-й ряд (слоты 18-26) ----
+    utility: auction
   '18':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '19':
     utility: auction
   '20':
@@ -114,17 +74,9 @@ block:
   '25':
     utility: auction
   '26':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-
-  # ---- 4-й ряд (слоты 27-35) ----
+    utility: auction
   '27':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
+    utility: auction
   '28':
     utility: auction
   '29':
@@ -140,38 +92,53 @@ block:
   '34':
     utility: auction
   '35':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: ' '
-    description: {}
-
-  # ---- 5-й ряд (слоты 36-44) ----
+    utility: auction
+  # ---- Разделитель: серые стеклянные панели (слоты 36-44) ----
   '36':
     utility: barrier
     material: GRAY_STAINED_GLASS_PANE
     title: ' '
     description: {}
   '37':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '38':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '39':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '40':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '41':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '42':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '43':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
   '44':
     utility: barrier
     material: GRAY_STAINED_GLASS_PANE
     title: ' '
     description: {}
-
-  # ---- 6-й ряд (слоты 45-53). Добавлены серые разделители в 48 и 52 ----
   '45':
     utility: player
     material: ENDER_CHEST
@@ -212,6 +179,8 @@ block:
       - "&a/ah sell &8<&aцена&8>"
       - ""
       - "&eАктивных продаж: &b{TotalSale}"
+      - "&7Бесплатных лотов осталось: &b{FreeListings}"
+      - "&7Свободных слотов: &b{FreeSlots}"
   '50':
     utility: next
     material: ARROW

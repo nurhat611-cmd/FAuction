@@ -63,6 +63,7 @@ fauction:
   lookup_not_found: "&cLe joueur &6{player}&c n'a jamais joué ici."
   lookup_empty: "&7{player} n'a rien en vente pour le moment."
   sell_invalid_amount: "&cImpossible de vendre {amount} de cet objet : votre main n'en contient que {max}."
+  expire_reminder: "&eVous avez &6{count}&e objet(s) expiré(s) qui vous attendent : &6/ah expire"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

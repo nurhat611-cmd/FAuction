@@ -69,6 +69,8 @@ public enum MessageKeys {
 
     SELL_INVALID_AMOUNT,
 
+    EXPIRE_REMINDER,
+
     MIGRATE,
 
     DATABASEERROR;

@@ -30,6 +30,19 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
 
     protected AbstractGuiWithAuctionsConfig abstractGuiWithAuctionsConfig;
 
+    /**
+     * The lots as handed to the gui, before the category narrows them : the statistics of the
+     * viewer ({@code {FreeSlots}}, {@code {FreeListings}}) count their lots on the whole of
+     * it, a category filter must not make slots look free that are not.
+     */
+    protected List<Auction> allAuctions;
+
+    private List<Auction> cachedOwnAuctions;
+
+    private String cachedFreeSlotsText;
+
+    private Integer cachedFreeListings;
+
     protected AbstractGuiWithAuctions(FAuction plugin, Player player, int page, List<Auction> auctions, Category category, Sort sort, AbstractGuiWithAuctionsConfig abstractGuiWithAuctionsConfig) {
         super(plugin, player, page, abstractGuiWithAuctionsConfig);
         this.auctions = auctions;
@@ -40,6 +53,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         this.category = category;
         this.sort = sort;
 
+        this.allAuctions = auctions;
         this.auctions = ListUtil.getAuctionByCategory(auctions, category);
         this.auctions = ListUtil.applySorting(this.auctions, sort);
 
@@ -119,6 +133,9 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
                 desc = desc.replace("{TotalSale}", "0");
             }
 
+            desc = desc.replace("{FreeSlots}", freeSlotsText());
+            desc = desc.replace("{FreeListings}", String.valueOf(freeListingsLeft()));
+
             desc = FormatUtil.format(desc);
             descriptions.add(desc);
         }
@@ -131,6 +148,66 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
         meta.setLore(descriptions);
         itemStack.setItemMeta(meta);
         return itemStack;
+    }
+
+    /**
+     * The lots of the viewer among everything the gui was given — what their slot limit and
+     * their free listings are counted against.
+     */
+    private List<Auction> ownAuctions() {
+        if (cachedOwnAuctions == null) {
+            cachedOwnAuctions = allAuctions == null ? List.of()
+                    : allAuctions.stream().filter(auction -> auction.getPlayerUUID().equals(player.getUniqueId())).toList();
+        }
+        return cachedOwnAuctions;
+    }
+
+    private String freeSlotsText() {
+        if (cachedFreeSlotsText == null) {
+            int limit = plugin.getLimitationManager().getAuctionLimitation(player);
+            cachedFreeSlotsText = limit < 0 ? "∞" : String.valueOf(Math.max(0, limit - ownAuctions().size()));
+        }
+        return cachedFreeSlotsText;
+    }
+
+    private int freeListingsLeft() {
+        if (cachedFreeListings == null) {
+            cachedFreeListings = plugin.getCommissionManager().getRemainingFreeListingsCached(player, ownAuctions());
+        }
+        return cachedFreeListings;
+    }
+
+    /**
+     * Adds one line of a lot description. The {@code {lore}} line expands to the lore of the
+     * item itself ; when the item carries none — or nothing but blank lines — the line adds
+     * nothing at all, and the header announcing it ({@code "&5Lore :"}, the line right above)
+     * goes with it : a "Description:" with nothing under it only tells the buyer that the gui
+     * has nothing to say.
+     */
+    protected void addDescriptionLine(List<String> descriptions, ItemStack item, String desc) {
+        if (!desc.contains("{lore}")) {
+            descriptions.add(FormatUtil.format(desc));
+            return;
+        }
+
+        List<String> itemLore = item.getItemMeta() != null ? item.getItemMeta().getLore() : null;
+        if (itemLore == null || itemLore.stream().allMatch(String::isBlank)) {
+            removeLoreHeader(descriptions);
+            return;
+        }
+        descriptions.addAll(itemLore);
+    }
+
+    private static void removeLoreHeader(List<String> descriptions) {
+        if (descriptions.isEmpty()) {
+            return;
+        }
+        // The header is the short label ending in a colon — "Lore :", "Описание:" — never a
+        // line still carrying a placeholder.
+        String last = descriptions.get(descriptions.size() - 1).replaceAll("§.", "").trim();
+        if (last.endsWith(":") && last.indexOf('{') < 0) {
+            descriptions.remove(descriptions.size() - 1);
+        }
     }
 
     public ItemStack createGuiItem(Auction auction) {
@@ -178,16 +255,7 @@ public abstract class AbstractGuiWithAuctions extends AbstractGui  {
 
             Duration duration = Duration.between(new Date().toInstant(), new Date(auction.getDate().getTime() + globalConfig.getTime() * 1000L).toInstant());
             desc = desc.replace("{RemainingTime}", FormatUtil.durationFormat(globalConfig.getRemainingDateFormat(), duration));
-            if (desc.contains("lore")) {
-                if (item.getItemMeta().getLore() != null) {
-                    listDescription.addAll(item.getItemMeta().getLore());
-                } else {
-                    listDescription.add(desc.replace("{lore}", ""));
-                }
-            } else {
-                desc = FormatUtil.format(desc);
-                listDescription.add(desc);
-            }
+            addDescriptionLine(listDescription, item, desc);
         }
         if (meta != null) {
 

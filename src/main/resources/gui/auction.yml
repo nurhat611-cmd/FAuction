@@ -2,7 +2,7 @@ version: 1
 gui:
   size: 54
   type: CHEST
-  name: "Auction House {Page}/{TotalPage}"
+  name: "Auction House &8>> &f{Page}/{TotalPage}"
   title: "&eItem : &6{ItemName}"
   replaceTitle: false
   hideFlag: false
@@ -15,55 +15,25 @@ gui:
     - "{lore}"
 block:
   '0':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '1':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '2':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '3':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '4':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '5':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '6':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '7':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '8':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '9':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '10':
     utility: auction
   '11':
@@ -79,15 +49,9 @@ block:
   '16':
     utility: auction
   '17':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '18':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '19':
     utility: auction
   '20':
@@ -103,15 +67,9 @@ block:
   '25':
     utility: auction
   '26':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '27':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '28':
     utility: auction
   '29':
@@ -127,34 +85,52 @@ block:
   '34':
     utility: auction
   '35':
-    utility: barrier
-    material: GRAY_STAINED_GLASS_PANE
-    title: " "
-    description: {}
+    utility: auction
   '36':
     utility: barrier
     material: GRAY_STAINED_GLASS_PANE
     title: " "
     description: {}
   '37':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '38':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '39':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '40':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '41':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '42':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '43':
-    utility: auction
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+    description: {}
   '44':
     utility: barrier
     material: GRAY_STAINED_GLASS_PANE
     title: " "
-    description: { }
+    description: {}
   '45':
     utility: player
     material: NETHER_STAR
@@ -194,6 +170,8 @@ block:
       - "&7To sell an item, you must:"
       - "&a/ah sell &7<&aprice&7>"
       - "&7Number of sales in progress: &b{TotalSale}"
+      - "&7Your free listings left: &b{FreeListings}"
+      - "&7Your available slots: &b{FreeSlots}"
   '50':
     utility: next
     material: ARROW

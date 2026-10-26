@@ -62,6 +62,7 @@ fauction:
   lookup_not_found: "&cИгрок &6{player}&c ещё не играл на сервере."
   lookup_empty: "&7У игрока {player} сейчас нет товаров на аукционе."
   sell_invalid_amount: "&cНельзя продать {amount} шт.: в руке только {max}."
+  expire_reminder: "&eУ вас &6{count}&e просроченных предметов: &6/ah expire"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

@@ -8,6 +8,8 @@ import fr.florianpal.fauction.queries.PlayerProfileQueries;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -35,6 +37,14 @@ public class CommissionManager {
     public static final List<Integer> FREE_TIERS = List.of(25, 16, 10, 7, 5, 3);
 
     private final FAuction plugin;
+
+    /**
+     * The lifetime counters of the connected players, read ahead at login : the gui renders
+     * {@code {FreeListings}} on a region thread and must never wait on the database for it.
+     * Display only — the sale itself always counts from the profile read in its own
+     * asynchronous step.
+     */
+    private final Map<UUID, Integer> usedFreeListingsCache = new ConcurrentHashMap<>();
 
     public CommissionManager(FAuction plugin) {
         this.plugin = plugin;
@@ -133,6 +143,41 @@ public class CommissionManager {
     }
 
     /**
+     * Warms the counter of a player who just connected, off their region thread.
+     */
+    public void preload(UUID playerUuid) {
+        runAsync(() -> usedFreeListingsCache.put(playerUuid, getUsedFreeListings(playerUuid)));
+    }
+
+    public void unload(UUID playerUuid) {
+        usedFreeListingsCache.remove(playerUuid);
+    }
+
+    /**
+     * {@link #getRemainingFreeListings} for the places that render synchronously — the gui.
+     * The counter comes from the cache warmed at login ; a cold cache (a gui opened within
+     * the same tick as the login, a reload) starts from zero for one painting and warms
+     * itself for the next, rather than reading the database where it stands.
+     */
+    public int getRemainingFreeListingsCached(Player player, List<Auction> playerAuctions) {
+        Integer used = usedFreeListingsCache.get(player.getUniqueId());
+        if (used == null) {
+            preload(player.getUniqueId());
+            used = usedFreeListingsCache.getOrDefault(player.getUniqueId(), 0);
+        }
+        return getRemainingFreeListings(player, playerAuctions, used);
+    }
+
+    private void runAsync(Runnable task) {
+        var foliaLib = FAuction.getFoliaLib();
+        if (foliaLib != null) {
+            foliaLib.getScheduler().runAsync(scheduled -> task.run());
+        } else {
+            task.run();
+        }
+    }
+
+    /**
      * Marks one free listing as spent. Only the lifetime mode has anything to write down : in
      * {@code ACTIVE} mode the lot itself carries its free flag, and the slot frees itself when
      * the lot leaves the market. A database write : call it asynchronously, and only once the
@@ -145,6 +190,7 @@ public class CommissionManager {
         PlayerProfileQueries queries = plugin.getPlayerProfileQueries();
         if (queries != null) {
             queries.incrementUsedFreeListings(playerUuid, playerName);
+            usedFreeListingsCache.computeIfPresent(playerUuid, (uuid, used) -> used + 1);
         }
     }
 
@@ -153,6 +199,7 @@ public class CommissionManager {
      * expired items and the history.
      */
     public void resetAllCounters() {
+        usedFreeListingsCache.clear();
         PlayerProfileQueries queries = plugin.getPlayerProfileQueries();
         if (queries != null) {
             queries.deleteAll();

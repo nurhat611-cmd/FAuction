@@ -62,6 +62,7 @@ fauction:
   lookup_not_found: "&cPlayer &6{player}&c has never played here."
   lookup_empty: "&7{player} has nothing for sale right now."
   sell_invalid_amount: "&cYou cannot sell {amount} of this item: your hand only holds {max}."
+  expire_reminder: "&eYou have &6{count}&e expired item(s) waiting for you: &6/ah expire"
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

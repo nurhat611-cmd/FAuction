@@ -2,6 +2,7 @@ package fr.florianpal.fauction.managers;
 
 import fr.florianpal.fauction.FAuctionTestBase;
 import fr.florianpal.fauction.enums.FreeQuotaMode;
+import fr.florianpal.fauction.queries.PlayerProfileQueries;
 import fr.florianpal.fauction.objects.Auction;
 import fr.florianpal.fauction.utils.SerializationUtil;
 import org.bukkit.Material;
@@ -93,6 +94,32 @@ class CommissionManagerTest extends FAuctionTestBase {
         assertEquals(0, manager.getUsedFreeListings(SELLER));
         assertDoesNotThrow(() -> manager.recordFreeListing(SELLER, "Seller"));
         assertDoesNotThrow(manager::resetAllCounters);
+    }
+
+    @Test
+    @DisplayName("The gui counts the free listings from the counter warmed at login, kept in step by the sales")
+    void cachedRemainingFollowsTheCounter() {
+
+        when(globalConfig.getCommissionFreeQuotaMode()).thenReturn(FreeQuotaMode.LIFETIME);
+        PlayerProfileQueries queries = mock(PlayerProfileQueries.class);
+        when(plugin.getPlayerProfileQueries()).thenReturn(queries);
+        when(queries.getUsedFreeListings(SELLER)).thenReturn(2);
+
+        Player player = quotaPlayer(10);
+        when(player.getUniqueId()).thenReturn(SELLER);
+
+        CommissionManager manager = new CommissionManager(plugin);
+        manager.preload(SELLER);
+        assertEquals(8, manager.getRemainingFreeListingsCached(player, List.of()));
+
+        // A free sale moves the cached counter with the stored one.
+        manager.recordFreeListing(SELLER, "Seller");
+        assertEquals(7, manager.getRemainingFreeListingsCached(player, List.of()));
+
+        // After logout the cache is cold again, and the next read warms it from the profile.
+        manager.unload(SELLER);
+        when(queries.getUsedFreeListings(SELLER)).thenReturn(4);
+        assertEquals(6, manager.getRemainingFreeListingsCached(player, List.of()));
     }
 
     private Player quotaPlayer(int tier) {

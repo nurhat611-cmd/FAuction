@@ -113,16 +113,7 @@ public class AuctionConfirmGui extends AbstractGuiWithAuctions {
 
             Duration duration = Duration.between(new Date().toInstant(), new Date(auction.getDate().getTime() + globalConfig.getTime() * 1000L).toInstant());
             desc = desc.replace("{RemainingTime}", FormatUtil.durationFormat(globalConfig.getRemainingDateFormat(), duration));
-            if (desc.contains("lore")) {
-                if (item.getItemMeta().getLore() != null) {
-                    listDescription.addAll(item.getItemMeta().getLore());
-                } else {
-                    listDescription.add(desc.replace("{lore}", ""));
-                }
-            } else {
-                desc = FormatUtil.format(desc);
-                listDescription.add(desc);
-            }
+            addDescriptionLine(listDescription, item, desc);
         }
         if (meta != null) {
             if (auctionConfirmConfig.isReplaceTitle()) {
