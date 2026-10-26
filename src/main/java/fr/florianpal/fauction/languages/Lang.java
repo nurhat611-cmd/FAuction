@@ -36,7 +36,7 @@ public final class Lang {
      * as the first version of the pattern, so it receives the whole relocation chain with no
      * detection code of ours.
      */
-    public static final String VERSION = "2";
+    public static final String VERSION = "3";
 
     static final String VERSION_ROUTE = "version";
 
@@ -89,7 +89,10 @@ public final class Lang {
                     DumperSettings.DEFAULT,
                     UpdaterSettings.builder()
                             .setVersioning(new BasicVersioning(VERSION_ROUTE))
-                            .addRelocations(VERSION, RELOCATIONS_V2, '.')
+                            // The relocations are the 1 -> 2 hop, whatever the current version
+                            // is : 2 -> 3 only adds keys, which the merge against the bundled
+                            // defaults does by itself.
+                            .addRelocations("2", RELOCATIONS_V2, '.')
                             // A language the plugin does not ship : nothing the administrator wrote
                             // may be dropped for being absent from the English defaults.
                             .setKeepAll(!bundled)

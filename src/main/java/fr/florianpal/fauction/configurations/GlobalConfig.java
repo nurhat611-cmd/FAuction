@@ -2,6 +2,7 @@ package fr.florianpal.fauction.configurations;
 
 import dev.dejvokep.boostedyaml.YamlDocument;
 import fr.florianpal.fauction.enums.CurrencyType;
+import fr.florianpal.fauction.enums.FreeQuotaMode;
 import fr.florianpal.fauction.enums.SpamAction;
 import fr.florianpal.fauction.objects.SpamLimit;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -75,6 +77,12 @@ public class GlobalConfig {
 
     private boolean updateCheckerEnabled = true;
 
+    private boolean commissionEnabled = true;
+
+    private double commissionPercent = 7.0;
+
+    private FreeQuotaMode commissionFreeQuotaMode = FreeQuotaMode.LIFETIME;
+
     public void load(YamlDocument config) {
         lang = config.getString("lang");
 
@@ -90,6 +98,13 @@ public class GlobalConfig {
         featureDuplicationHashCodeControl = config.getBoolean("feature-flipping.duplication-hashcode-control", false);
 
         updateCheckerEnabled = config.getBoolean("update-checker.enabled", true);
+
+        commissionEnabled = config.getBoolean("commission.enabled", true);
+        // A percentage outside 0-100 would take more than the price, or pay the seller for
+        // listing : clamp it rather than let a typo reach the economy.
+        double percent = config.getDouble("commission.percent", 7.0);
+        commissionPercent = Double.isFinite(percent) ? Math.min(100, Math.max(0, percent)) : 7.0;
+        commissionFreeQuotaMode = parseFreeQuotaMode(config.getString("commission.free-quota-mode", "LIFETIME"));
 
         orderBy = config.getString("orderBy");
         dateFormat = config.getString("dateFormat");
@@ -157,6 +172,22 @@ public class GlobalConfig {
         if (config.contains("item-blacklist")) {
             blacklistItem = config.getStringList("item-blacklist").stream().map(Material::valueOf).collect(Collectors.toList());
         }
+    }
+
+    /**
+     * An unknown mode falls back on the lifetime budget instead of keeping the plugin from
+     * starting : the worst a typo does is spend the quota the other way, and the value stays
+     * visible in the file for the administrator to fix.
+     */
+    private static FreeQuotaMode parseFreeQuotaMode(String value) {
+        if (value != null) {
+            try {
+                return FreeQuotaMode.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                return FreeQuotaMode.LIFETIME;
+            }
+        }
+        return FreeQuotaMode.LIFETIME;
     }
 
     public SpamLimit getSpamLimit(SpamAction action) {

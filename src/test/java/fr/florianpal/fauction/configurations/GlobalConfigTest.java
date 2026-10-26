@@ -1,6 +1,7 @@
 package fr.florianpal.fauction.configurations;
 
 import fr.florianpal.fauction.enums.CurrencyType;
+import fr.florianpal.fauction.enums.FreeQuotaMode;
 import fr.florianpal.fauction.enums.SpamAction;
 import fr.florianpal.fauction.objects.SpamLimit;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +39,9 @@ class GlobalConfigTest {
         assertFalse(config.isFeatureFlippingMoneyFormat());
         assertFalse(config.isFeatureDuplicationHashCodeControl());
         assertEquals(5, config.getLimitations().get("default"));
+        assertTrue(config.isCommissionEnabled());
+        assertEquals(7.0, config.getCommissionPercent());
+        assertEquals(FreeQuotaMode.LIFETIME, config.getCommissionFreeQuotaMode());
     }
 
     @Test
@@ -110,6 +114,38 @@ class GlobalConfigTest {
 
         assertEquals(60, config.getTimeCurrency());
         assertEquals(1200, config.getCheckEveryCurrency());
+    }
+
+    @Test
+    @DisplayName("The commission section is read, clamped and falls back safely")
+    void commissionSectionIsReadAndClamped() {
+
+        GlobalConfig config = new GlobalConfig();
+        config.load(TestConfigs.of("""
+                lang: "en"
+                limitations:
+                  default: 5
+                commission:
+                  enabled: false
+                  percent: 150
+                  free-quota-mode: ACTIVE
+                """));
+
+        assertFalse(config.isCommissionEnabled());
+        assertEquals(100.0, config.getCommissionPercent());
+        assertEquals(FreeQuotaMode.ACTIVE, config.getCommissionFreeQuotaMode());
+
+        config.load(TestConfigs.of("""
+                lang: "en"
+                limitations:
+                  default: 5
+                commission:
+                  percent: -5
+                  free-quota-mode: UNKNOWN
+                """));
+
+        assertEquals(0.0, config.getCommissionPercent());
+        assertEquals(FreeQuotaMode.LIFETIME, config.getCommissionFreeQuotaMode());
     }
 
     @Test

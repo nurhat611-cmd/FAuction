@@ -39,6 +39,14 @@ public enum MessageKeys {
 
     AUCTION_PURGE,
 
+    PLAYER_DATA_CLEAR,
+
+    COMMISSION_PAID,
+
+    COMMISSION_FREE,
+
+    COMMISSION_NOT_ENOUGH,
+
     MIGRATE,
 
     DATABASEERROR;

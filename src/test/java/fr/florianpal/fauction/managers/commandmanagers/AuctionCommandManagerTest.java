@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -195,7 +196,7 @@ class AuctionCommandManagerTest extends FAuctionTestBase {
         // here would never match the id the database actually assigns, leaving the row impossible to
         // delete from the market.
         when(auctionQueries.getAuctions()).thenReturn(new ArrayList<>(List.of(auction(5, SELLER, 250.0))));
-        when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any())).thenReturn(42);
+        when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any(), anyBoolean())).thenReturn(42);
         AuctionCommandManager manager = new AuctionCommandManager(plugin);
         Player seller = server.addPlayer();
 
@@ -211,7 +212,7 @@ class AuctionCommandManagerTest extends FAuctionTestBase {
     void failedSqliteInsertDoesNotEnterTheCache() {
 
         when(auctionQueries.getAuctions()).thenReturn(new ArrayList<>());
-        when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any())).thenReturn(-1);
+        when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any(), anyBoolean())).thenReturn(-1);
         AuctionCommandManager manager = new AuctionCommandManager(plugin);
         Player seller = server.addPlayer();
 
@@ -302,7 +303,7 @@ class AuctionCommandManagerTest extends FAuctionTestBase {
             AuctionCommandManager manager = new AuctionCommandManager(plugin);
             Player seller = server.addPlayer();
 
-            when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any())).thenReturn(-1);
+            when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any(), anyBoolean())).thenReturn(-1);
 
             assertFalse(manager.addAuction(seller, namedItem(Material.DIAMOND, 1, "Gem"), 10.0));
         }

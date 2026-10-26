@@ -1,7 +1,20 @@
-version: 12
+version: 13
 lang: "en"
 
 currencyUse: VAULT # VAULT, EXPERIENCE, LEVEL
+
+# Auction commission, charged to the seller when a lot is listed with /ah sell.
+# - percent : part of the price taken as commission (7.0 == 7%).
+# - The permissions fauction.nocommission.3 / .5 / .7 / .10 / .16 / .25 let a player list that
+#   many lots WITHOUT paying it. With several of them, the highest tier wins (they do not add up).
+# - free-quota-mode LIFETIME : the quota is spent for good, lot after lot ; the per-player counter
+#   only goes back to zero on a wipe (/ah clear data players).
+# - free-quota-mode ACTIVE : only the free lots currently on the market count ; a free slot comes
+#   back as soon as its lot is sold, cancelled or expired.
+commission:
+  enabled: true
+  percent: 7.0
+  free-quota-mode: LIFETIME # LIFETIME or ACTIVE
 
 defaultGui: AUCTION # The default gui open with /ah command
 

@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The config.yml of a server that is already running, updated against the one the plugin ships.
@@ -47,7 +48,10 @@ class ConfigUpdateTest {
 
         assertEquals(List.of("ah", "hdv"), updated.getStringList("commands.root"));
         assertEquals(List.of("sell"), updated.getStringList("commands.sell"));
-        assertEquals("12", String.valueOf(updated.get("version")));
+        assertEquals("13", String.valueOf(updated.get("version")));
+        assertTrue(updated.getBoolean("commission.enabled"));
+        assertEquals(7.0, updated.getDouble("commission.percent"));
+        assertEquals("LIFETIME", updated.getString("commission.free-quota-mode"));
 
         // Nothing the administrator wrote moved.
         assertEquals("fr", updated.getString("lang"));

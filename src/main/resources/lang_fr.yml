@@ -1,6 +1,6 @@
 # Language file of FAuction. "version" is managed by the plugin : leave it alone,
 # it is what lets your own texts be kept when new keys are added.
-version: 2
+version: 3
 fauction:
   help_description: "Affiche cette aide."
   auction_list_help_description: "Pour ouvrir l'hôtel des ventes"
@@ -11,6 +11,7 @@ fauction:
   transfert_bdd_help_description: "Transfert des données de la bdd vers spigot->paper ou paper->spigot"
   clear_cache_help_description: "Pour vider le cache"
   migrate_help_description: "Faire une migration vers une autre version."
+  clear_players_help_description: "Effacer les données d'enchères des joueurs et les compteurs sans commission"
   auction_search_help_description: "Rechercher un item"
 
   buy_auction_success: "Vous venez d'acheter l'item {item} pour le prix de {price}."
@@ -44,6 +45,10 @@ fauction:
   migrate: "Vous avez effectué une migration vers la version {version}."
 
   auction_purge: "Vous avez effacé toutes les données."
+  player_data_clear: "Toutes les données d'enchères des joueurs et les compteurs de mises en vente sans commission ont été effacés."
+  commission_paid: "Commission de l'hôtel des ventes prélevée : {fee} ({percent}%)."
+  commission_free: "Mis en vente sans commission. Mises en vente gratuites restantes : {remaining}."
+  commission_not_enough: "Vous n'avez pas assez d'argent pour payer la commission de {fee} ({percent}%)."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

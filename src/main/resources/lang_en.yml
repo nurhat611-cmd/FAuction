@@ -1,6 +1,6 @@
 # Language file of FAuction. "version" is managed by the plugin : leave it alone,
 # it is what lets your own texts be kept when new keys are added.
-version: 2
+version: 3
 fauction:
   help_description: "Displays this help."
   auction_list_help_description: "To open the auction house"
@@ -12,6 +12,7 @@ fauction:
   clear_cache_help_description: "To clear the cache"
   auction_search_help_description: "Search for an item"
   migrate_help_description: "Migrate to another version."
+  clear_players_help_description: "Wipe the player auction data and the free-commission counters"
 
   buy_auction_success: "You just bought {item} for {price}."
   buy_auction_target_success: "The player {player} bought your item {item} at the price of {price}."
@@ -43,6 +44,10 @@ fauction:
 
   transfert_bdd: "Transfert of the database finished."
   auction_purge: "You have erased all data."
+  player_data_clear: "All player auction data and the free-commission counters have been cleared."
+  commission_paid: "Auction commission charged: {fee} ({percent}%)."
+  commission_free: "Listed without commission. Free listings left: {remaining}."
+  commission_not_enough: "You do not have enough money to pay the auction commission of {fee} ({percent}%)."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

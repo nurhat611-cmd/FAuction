@@ -2,9 +2,9 @@ name: FAuction
 main: fr.florianpal.fauction.FAuction
 author: florianpal
 version: 2.3.0
-api-version: 1.13
+api-version: '1.21'
 folia-supported: true
-softdepend: [Vault]
+softdepend: [Vault, LuckPerms, PlaceholderAPI]
 permissions:
   fauction.user:
     description: Parent, grants every player permission
@@ -43,6 +43,7 @@ permissions:
       fauction.admin.purge.hictoric: true
       fauction.admin.transfertBddToPaper: true
       fauction.admin.migrate: true
+      fauction.admin.clear.players: true
   fauction.admin.reload:
     description: Reload the configuration
     default: op
@@ -64,3 +65,24 @@ permissions:
   fauction.admin.migrate:
     description: Run the migration of a given version
     default: op
+  fauction.admin.clear.players:
+    description: Wipe the player auction data and the free-commission counters (/ah clear data players)
+    default: op
+  fauction.nocommission.3:
+    description: List 3 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.5:
+    description: List 5 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.7:
+    description: List 7 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.10:
+    description: List 10 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.16:
+    description: List 16 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.25:
+    description: List 25 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false

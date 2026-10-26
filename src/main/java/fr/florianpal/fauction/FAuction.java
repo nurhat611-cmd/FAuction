@@ -14,6 +14,7 @@ import fr.florianpal.fauction.queries.AuctionQueries;
 import fr.florianpal.fauction.queries.CurrencyPendingQueries;
 import fr.florianpal.fauction.queries.ExpireQueries;
 import fr.florianpal.fauction.queries.HistoricQueries;
+import fr.florianpal.fauction.queries.PlayerProfileQueries;
 import fr.florianpal.fauction.schedules.CacheSchedule;
 import fr.florianpal.fauction.schedules.CurrencyScheduler;
 import fr.florianpal.fauction.schedules.ExpireSchedule;
@@ -55,6 +56,9 @@ public class FAuction extends JavaPlugin {
     private CurrencyPendingQueries currencyPendingQueries;
 
     @Getter
+    private PlayerProfileQueries playerProfileQueries;
+
+    @Getter
     private CommandManager commandManager;
 
     @Getter
@@ -83,6 +87,9 @@ public class FAuction extends JavaPlugin {
 
     @Getter
     private ClaimManager claimManager;
+
+    @Getter
+    private CommissionManager commissionManager;
 
     @Getter
     private TransfertManager transfertManager;
@@ -168,12 +175,17 @@ public class FAuction extends JavaPlugin {
         expireQueries = new ExpireQueries(this);
         historicQueries = new HistoricQueries(this);
         currencyPendingQueries = new CurrencyPendingQueries(this);
+        playerProfileQueries = new PlayerProfileQueries(this);
 
         databaseManager.addRepository(expireQueries);
         databaseManager.addRepository(auctionQueries);
         databaseManager.addRepository(historicQueries);
         databaseManager.addRepository(currencyPendingQueries);
+        databaseManager.addRepository(playerProfileQueries);
         databaseManager.initializeTables();
+        // Databases created before the commission existed have no flag on their lots, and every
+        // read expects it : the column goes in before any manager loads the market.
+        auctionQueries.ensureCommissionFreeColumn();
 
         auctionCommandManager = new AuctionCommandManager(this);
         expireCommandManager = new ExpireCommandManager(this);
@@ -181,6 +193,7 @@ public class FAuction extends JavaPlugin {
 
         spamManager = new SpamManager(this);
         claimManager = new ClaimManager();
+        commissionManager = new CommissionManager(this);
         transfertManager = new TransfertManager(this);
 
         commandManager.register(new AuctionCommand(this));
@@ -328,6 +341,18 @@ public class FAuction extends JavaPlugin {
         auctionCommandManager.deleteAll();
         expireCommandManager.deleteAll();
         historicCommandManager.deleteAll();
+    }
+
+    /**
+     * The player data wipe ({@code /ah clear data players}) : everything {@link #purgeAllData()}
+     * removes — the active lots, the expired items and the sales history of every player — plus
+     * the free-commission counters back to zero, so a {@code fauction.nocommission.<n>} quota
+     * starts the new season full again. The plain purge deliberately keeps the counters : it
+     * empties the market, it does not hand spent donor quotas back.
+     */
+    public void clearPlayerData() {
+        purgeAllData();
+        commissionManager.resetAllCounters();
     }
 
     public void purgeAllExpire() {

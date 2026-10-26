@@ -7,6 +7,7 @@ import fr.florianpal.fauction.managers.DatabaseManager;
 import fr.florianpal.fauction.objects.Auction;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,7 +28,7 @@ public class AuctionQueries implements IDatabaseTable {
 
     private static final String GET_AUCTIONS_BY_UUID = "SELECT * FROM auctions WHERE playerUuid=?";
 
-    private static final String ADD_AUCTION = "INSERT INTO auctions (playerUuid, playerName, item, price, date) VALUES(?,?,?,?,?)";
+    private static final String ADD_AUCTION = "INSERT INTO auctions (playerUuid, playerName, item, price, date, commissionFree) VALUES(?,?,?,?,?,?)";
 
     private static final String UPDATE_ITEM = "UPDATE auctions set item=? where id=?";
 
@@ -60,6 +61,10 @@ public class AuctionQueries implements IDatabaseTable {
      * again.
      */
     public int addAuction(UUID playerUUID, String playerName, byte[] item, double price, Date date) {
+        return addAuction(playerUUID, playerName, item, price, date, false);
+    }
+
+    public int addAuction(UUID playerUUID, String playerName, byte[] item, double price, Date date, boolean commissionFree) {
 
         try (Connection connection = databaseManager.getConnection()) {
 
@@ -70,6 +75,7 @@ public class AuctionQueries implements IDatabaseTable {
                 statement.setBytes(3, item);
                 statement.setDouble(4, price);
                 statement.setLong(5, date.getTime());
+                statement.setBoolean(6, commissionFree);
                 if (statement.executeUpdate() == 0) {
                     return -1;
                 }
@@ -167,8 +173,9 @@ public class AuctionQueries implements IDatabaseTable {
                         byte[] item = result.getBytes(4);
                         double price = result.getDouble(5);
                         long date = result.getLong(6);
+                        boolean commissionFree = result.getBoolean(7);
 
-                        auctions.add(new Auction(id, playerUuid, playerName, price, item, date));
+                        auctions.add(new Auction(id, playerUuid, playerName, price, item, date, commissionFree));
                     }
                 }
             }
@@ -193,8 +200,9 @@ public class AuctionQueries implements IDatabaseTable {
                         byte[] item = result.getBytes(4);
                         double price = result.getDouble(5);
                         long date = result.getLong(6);
+                        boolean commissionFree = result.getBoolean(7);
 
-                        auctions.add(new Auction(id, playerUuid, playerName, price, item, date));
+                        auctions.add(new Auction(id, playerUuid, playerName, price, item, date, commissionFree));
                     }
                 }
             }
@@ -221,7 +229,9 @@ public class AuctionQueries implements IDatabaseTable {
                         long date = result.getLong(6);
 
 
-                        auction = new Auction(id, playerUuid, playerName, price, item, date);
+                        boolean commissionFree = result.getBoolean(7);
+
+                        auction = new Auction(id, playerUuid, playerName, price, item, date, commissionFree);
                     }
                 }
             }
@@ -229,6 +239,36 @@ public class AuctionQueries implements IDatabaseTable {
             plugin.getLogger().severe(String.join("Error when get auction by id. Error {} ", e.getMessage()));
         }
         return auction;
+    }
+
+    /**
+     * Adds the {@code commissionFree} column to a database created before the commission existed.
+     * {@code DatabaseManager.initializeTables()} only ever creates a missing table, and the
+     * selects read the flag as their seventh column : on an old database they would all fail and
+     * the market would look empty. Must run before the first read.
+     */
+    public void ensureCommissionFreeColumn() {
+        try (Connection connection = databaseManager.getConnection()) {
+            // Column names come back lowercased from some drivers (PostgreSQL), as written from
+            // others : ask for both before concluding the column is missing.
+            if (columnExists(connection, "commissionFree") || columnExists(connection, "commissionfree")) {
+                return;
+            }
+            String defaultValue = plugin.getConfigurationManager().getDatabase().getSqlType() == SQLType.PostgreSQL ? "FALSE" : "0";
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("ALTER TABLE auctions ADD COLUMN commissionFree BOOLEAN NOT NULL DEFAULT " + defaultValue);
+            }
+            plugin.getLogger().info("The auctions table gained its commissionFree column !");
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Error when adding the commissionFree column to the auctions table. Error " + e.getMessage());
+        }
+    }
+
+    private boolean columnExists(Connection connection, String columnName) throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        try (ResultSet columns = metaData.getColumns(null, null, "auctions", columnName)) {
+            return columns.next();
+        }
     }
 
     @Override
@@ -239,7 +279,8 @@ public class AuctionQueries implements IDatabaseTable {
                         "`playerName` VARCHAR(36) NOT NULL, " +
                         "`item` BLOB NOT NULL, " +
                         "`price` DOUBLE NOT NULL, " +
-                        "`date` LONG NOT NULL",
+                        "`date` LONG NOT NULL, " +
+                        "`commissionFree` BOOLEAN NOT NULL",
                 parameters
         };
     }

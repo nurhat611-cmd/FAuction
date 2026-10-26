@@ -1,6 +1,6 @@
 # Language file of FAuction. "version" is managed by the plugin : leave it alone,
 # it is what lets your own texts be kept when new keys are added.
-version: 2
+version: 3
 fauction:
   help_description: "显示本帮助页面."
   auction_list_help_description: "打开竞拍市场"
@@ -12,6 +12,7 @@ fauction:
   auction_search_help_description: "搜索物品"
   clear_cache_help_description: "清空缓存"
   migrate_help_description: "迁移至其他版本."
+  clear_players_help_description: "清除玩家拍卖数据和免佣金计数"
 
   buy_auction_success: "你购买了一个物品."
   buy_auction_target_success: "The player {player} bought your item {item} at the price of {price}."
@@ -55,6 +56,10 @@ fauction:
   item_blacklist: "You cannot sell this item !"
 
   auction_purge: "You have erased all data."
+  player_data_clear: "所有玩家的拍卖数据和免佣金计数已清除."
+  commission_paid: "已收取拍卖佣金: {fee} ({percent}%)."
+  commission_free: "已免佣金上架. 剩余免佣金上架次数: {remaining}."
+  commission_not_enough: "你的资金不足以支付拍卖佣金 {fee} ({percent}%)."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:

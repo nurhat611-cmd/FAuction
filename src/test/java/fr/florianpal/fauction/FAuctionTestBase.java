@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -83,6 +84,7 @@ public abstract class FAuctionTestBase {
         AtomicInteger nextAuctionId = new AtomicInteger(1000);
         AtomicInteger nextExpireId = new AtomicInteger(1000);
         when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any())).thenAnswer(invocation -> nextAuctionId.getAndIncrement());
+        when(auctionQueries.addAuction(any(), anyString(), any(), anyDouble(), any(), anyBoolean())).thenAnswer(invocation -> nextAuctionId.getAndIncrement());
         when(auctionQueries.deleteAuctions(anyInt())).thenReturn(true);
         when(expireQueries.addExpire(any(), anyString(), any(), anyDouble(), any())).thenAnswer(invocation -> nextExpireId.getAndIncrement());
         when(expireQueries.deleteExpire(anyInt())).thenReturn(true);

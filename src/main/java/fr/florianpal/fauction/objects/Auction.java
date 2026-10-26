@@ -25,7 +25,18 @@ public class Auction {
 
     private final Date date;
 
+    /**
+     * Listed without paying the auction commission, out of the {@code fauction.nocommission.<n>}
+     * quota of the seller. In {@code ACTIVE} quota mode this flag IS the quota accounting : the
+     * free listings a player has left are their quota minus the flagged lots still on the market.
+     */
+    private final boolean commissionFree;
+
     public Auction(int id, UUID playerUUID, String playerName, double price, byte[] item, long date) {
+        this(id, playerUUID, playerName, price, item, date, false);
+    }
+
+    public Auction(int id, UUID playerUUID, String playerName, double price, byte[] item, long date, boolean commissionFree) {
         this.id = id;
         this.playerUUID = playerUUID;
         this.playerName = playerName;
@@ -36,6 +47,7 @@ public class Auction {
             throw new RuntimeException(e);
         }
         this.date = new Date(date);
+        this.commissionFree = commissionFree;
     }
 
 }

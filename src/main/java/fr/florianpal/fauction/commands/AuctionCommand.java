@@ -8,12 +8,14 @@ import fr.florianpal.fauction.events.AuctionAddEvent;
 import fr.florianpal.fauction.gui.subGui.*;
 import fr.florianpal.fauction.languages.MessageKeys;
 import fr.florianpal.fauction.managers.ClaimManager;
+import fr.florianpal.fauction.managers.CommissionManager;
 import fr.florianpal.fauction.managers.SpamManager;
 import fr.florianpal.fauction.managers.commandmanagers.AuctionCommandManager;
 import fr.florianpal.fauction.managers.commandmanagers.ExpireCommandManager;
 import fr.florianpal.fauction.managers.commandmanagers.HistoricCommandManager;
 import fr.florianpal.fauction.objects.Auction;
 import fr.florianpal.fauction.objects.Category;
+import fr.florianpal.fauction.utils.CurrencyUtil;
 import fr.florianpal.fauction.utils.FormatUtil;
 import fr.florianpal.fauction.utils.ListUtil;
 import fr.florianpal.fauction.utils.MessageUtil;
@@ -95,6 +97,14 @@ public class AuctionCommand {
     private List<Integer> itemHash = new ArrayList<>();
 
     protected DecimalFormat df;
+
+    /**
+     * What the first asynchronous step of a sale reads from the database : the lots of the seller
+     * (their limit, and the free ones among them) and their lifetime free-listing counter. Both
+     * feed the commission decision of the sync step, which must not read the database itself.
+     */
+    private record SellData(List<Auction> auctions, int usedFreeListings) {
+    }
 
     public AuctionCommand(FAuction plugin) {
         this.plugin = plugin;
@@ -215,7 +225,11 @@ public class AuctionCommand {
 
         AtomicBoolean itemTaken = new AtomicBoolean(false);
 
-        FAuction.newChain(playerSender).asyncFirst(() -> plugin.getAuctionCommandManager().getAuctions(playerSender.getUniqueId())).syncLast(auctions -> {
+        FAuction.newChain(playerSender).asyncFirst(() -> new SellData(
+                plugin.getAuctionCommandManager().getAuctions(playerSender.getUniqueId()),
+                plugin.getCommissionManager().getUsedFreeListings(playerSender.getUniqueId()))).syncLast(sellData -> {
+
+            List<Auction> auctions = sellData.auctions();
 
             int limitations;
             if (plugin.getConfigurationManager().getGlobalConfig().isLimitationsUseMetaLuckperms()) {
@@ -236,8 +250,31 @@ public class AuctionCommand {
                 return;
             }
 
+            // The commission is decided and taken while the item is still in the inventory, for
+            // the same reason as every other check above : a seller who cannot pay it keeps their
+            // item, and a free listing of their fauction.nocommission.<n> quota is only spent on
+            // a sale that really reaches the database (recorded with the save, further down).
+            CommissionManager commissionManager = plugin.getCommissionManager();
+            double commissionFee = commissionManager.getFee(price);
+            int freeListingsLeft = commissionManager.getRemainingFreeListings(playerSender, auctions, sellData.usedFreeListings());
+            boolean commissionFree = commissionFee > 0 && freeListingsLeft > 0;
+            double feeToPay = commissionFree ? 0 : commissionFee;
+            AtomicBoolean feePaid = new AtomicBoolean(false);
+
+            if (feeToPay > 0) {
+                if (!CurrencyUtil.haveCurrency(plugin, playerSender, globalConfig.getCurrencyType(), feeToPay)
+                        || !CurrencyUtil.getCurrency(plugin, playerSender, globalConfig.getCurrencyType(), feeToPay)) {
+                    MessageUtil.sendMessage(plugin, playerSender, MessageKeys.COMMISSION_NOT_ENOUGH, "{fee}", df.format(feeToPay), "{percent}", df.format(commissionManager.getPercent()));
+                    return;
+                }
+                feePaid.set(true);
+            }
+
             if (globalConfig.isFeatureDuplicationHashCodeControl()) {
                 if (itemHash.contains((Integer) itemToSell.hashCode())) {
+                    if (feePaid.get()) {
+                        CurrencyUtil.giveCurrency(plugin, playerSender, globalConfig.getCurrencyType(), feeToPay);
+                    }
                     return;
                 }
                 itemHash.add((Integer) itemToSell.hashCode());
@@ -249,7 +286,15 @@ public class AuctionCommand {
             playerSender.updateInventory();
             itemTaken.set(true);
 
-            FAuction.newChain(playerSender).asyncFirst(() -> auctionCommandManager.addAuction(playerSender, itemToSell, price)).syncLast(added -> {
+            FAuction.newChain(playerSender).asyncFirst(() -> {
+                boolean addedAuction = auctionCommandManager.addAuction(playerSender, itemToSell, price, commissionFree);
+                // The free listing is spent with the save it belongs to, and only with it : a lot
+                // the database refused goes back to the inventory further down, quota untouched.
+                if (addedAuction && commissionFree) {
+                    commissionManager.recordFreeListing(playerSender.getUniqueId(), playerSender.getName());
+                }
+                return addedAuction;
+            }).syncLast(added -> {
 
                 // The hash only guards this sale while it is in flight ; it must not survive the
                 // round trip, or every future sale of a visually identical item would be blocked
@@ -260,16 +305,26 @@ public class AuctionCommand {
 
                 if (!Boolean.TRUE.equals(added)) {
                     plugin.getLogger().severe("Auction of " + playerSender.getName() + " could not be saved, item given back");
+                    if (feePaid.get()) {
+                        CurrencyUtil.giveCurrency(plugin, playerSender, globalConfig.getCurrencyType(), feeToPay);
+                    }
                     resetItem(playerSender, itemToSell);
                     return;
                 }
 
                 String itemName = itemToSell.getItemMeta().getDisplayName() == null || itemToSell.getItemMeta().getDisplayName().isEmpty() ? itemToSell.getType().toString() : itemToSell.getItemMeta().getDisplayName();
-                plugin.getLogger().info("Player " + playerSender.getName() + " add item to ah Item : " + itemName + ", At Price : " + price);
+                plugin.getLogger().info("Player " + playerSender.getName() + " add item to ah Item : " + itemName + ", At Price : " + price
+                        + ", Commission : " + (commissionFree ? "free (nocommission quota)" : df.format(feeToPay)));
 
                 Bukkit.getPluginManager().callEvent(new AuctionAddEvent(playerSender, itemToSell, price));
 
                 MessageUtil.sendMessage(plugin, playerSender, MessageKeys.AUCTION_ADD_SUCCESS, "{item}", FormatUtil.titleItemFormat(itemToSell), "{price}", df.format(price));
+
+                if (commissionFree) {
+                    MessageUtil.sendMessage(plugin, playerSender, MessageKeys.COMMISSION_FREE, "{remaining}", String.valueOf(freeListingsLeft - 1));
+                } else if (feePaid.get()) {
+                    MessageUtil.sendMessage(plugin, playerSender, MessageKeys.COMMISSION_PAID, "{fee}", df.format(feeToPay), "{percent}", df.format(commissionManager.getPercent()));
+                }
             }, added -> {
 
                 // Same reason as above : the hash must not survive the round trip, and it is no
@@ -279,6 +334,12 @@ public class AuctionCommand {
                 }
 
                 if (!Boolean.TRUE.equals(added)) {
+                    // The commission goes back with the same priority as the item : a sale that
+                    // never happened was never charged. Vault refunds an offline player, the
+                    // other currencies queue the amount until they come back.
+                    if (feePaid.get()) {
+                        CurrencyUtil.giveCurrency(plugin, playerSender, globalConfig.getCurrencyType(), feeToPay);
+                    }
                     // The item left the inventory, was never saved, and the seller is gone : park it
                     // in their expired items rather than losing it. The id is the database's to
                     // assign, addExpire() ignores the one carried here.
@@ -495,6 +556,21 @@ public class AuctionCommand {
         FAuction.newChain().async(() -> {
             plugin.purgeAllAuction();
             MessageUtil.sendMessage(plugin, playerSender, MessageKeys.AUCTION_PURGE);
+        }).execute();
+    }
+
+    // Two spellings, one wipe : "clear data players" is the form asked for when a season ends,
+    // "admin purge players" keeps it next to the other purges. The words are literals, like
+    // "purge all" : only the root (and the admin branch) can be renamed in config.yml.
+    @Command(ROOT + SPACE + "clear data players")
+    @Command(ROOT + SPACE + ADMIN + SPACE + "purge players")
+    @Permission("fauction.admin.clear.players")
+    @CommandDescription("{@@fauction.clear_players_help_description}")
+    public void onClearPlayerData(Player playerSender) {
+
+        FAuction.newChain().async(() -> {
+            plugin.clearPlayerData();
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.PLAYER_DATA_CLEAR);
         }).execute();
     }
 

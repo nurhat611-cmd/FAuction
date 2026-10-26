@@ -57,6 +57,16 @@ public class AuctionCommandManager {
      * @return true if the auction has been saved, the item can stay out of the inventory.
      */
     public synchronized boolean addAuction(Player player, ItemStack item, double price)  {
+        return addAuction(player, item, price, false);
+    }
+
+    /**
+     * @param commissionFree listed out of the {@code fauction.nocommission.<n>} quota of the
+     *                       seller ; carried by the row (and by the cache) so the ACTIVE quota
+     *                       mode can count the free lots still on the market.
+     * @return true if the auction has been saved, the item can stay out of the inventory.
+     */
+    public synchronized boolean addAuction(Player player, ItemStack item, double price, boolean commissionFree)  {
         byte[] serializedItem = SerializationUtil.serialize(item);
         Date date = Calendar.getInstance().getTime();
 
@@ -64,20 +74,20 @@ public class AuctionCommandManager {
         // write is confirmed, using the id the database itself assigned so the two id spaces can
         // never drift apart (a locally guessed id would, e.g. as soon as the highest-id row so far
         // had already been deleted once).
-        int id = auctionQueries.addAuction(player.getUniqueId(), player.getName(), serializedItem, price, date);
+        int id = auctionQueries.addAuction(player.getUniqueId(), player.getName(), serializedItem, price, date, commissionFree);
         if (id < 0) {
             return false;
         }
 
         if (SQLType.SQLite.equals(sqlType)) {
-            sqliteCache.add(new Auction(id, player.getUniqueId(), player.getName(), price, serializedItem, date.getTime()));
+            sqliteCache.add(new Auction(id, player.getUniqueId(), player.getName(), price, serializedItem, date.getTime(), commissionFree));
         }
         return true;
     }
 
     public void saveAllAuctionInBddFromSQLiteCache()  {
         for (Auction auction : sqliteCache) {
-            auctionQueries.addAuction(auction.getPlayerUUID(), auction.getPlayerName(), SerializationUtil.serialize(auction.getItemStack()), auction.getPrice(), auction.getDate());
+            auctionQueries.addAuction(auction.getPlayerUUID(), auction.getPlayerName(), SerializationUtil.serialize(auction.getItemStack()), auction.getPrice(), auction.getDate(), auction.isCommissionFree());
         }
     }
 
@@ -122,7 +132,7 @@ public class AuctionCommandManager {
      */
     public synchronized void restore(Auction auction) {
         byte[] serializedItem = SerializationUtil.serialize(auction.getItemStack());
-        int id = auctionQueries.addAuction(auction.getPlayerUUID(), auction.getPlayerName(), serializedItem, auction.getPrice(), auction.getDate());
+        int id = auctionQueries.addAuction(auction.getPlayerUUID(), auction.getPlayerName(), serializedItem, auction.getPrice(), auction.getDate(), auction.isCommissionFree());
         boolean savedInDb = id >= 0;
 
         if (!savedInDb) {
@@ -141,7 +151,7 @@ public class AuctionCommandManager {
             // The database write failed above, so there is no real id to reuse ; the cache-only
             // fallback id must stay out of the range SQLite assigns, which is why it is negative.
             int cacheId = savedInDb ? id : fallbackId--;
-            sqliteCache.add(new Auction(cacheId, auction.getPlayerUUID(), auction.getPlayerName(), auction.getPrice(), serializedItem, auction.getDate().getTime()));
+            sqliteCache.add(new Auction(cacheId, auction.getPlayerUUID(), auction.getPlayerName(), auction.getPrice(), serializedItem, auction.getDate().getTime(), auction.isCommissionFree()));
         }
     }
 
