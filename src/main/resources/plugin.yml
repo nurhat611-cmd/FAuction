@@ -15,6 +15,7 @@ permissions:
       fauction.expire: true
       fauction.search: true
       fauction.sounds: true
+      fauction.lookup: true
   fauction.list:
     description: Open the auction gui
     default: true
@@ -30,6 +31,12 @@ permissions:
   fauction.sounds:
     description: Turn your own auction sounds on or off (/ah sounds on|off)
     default: true
+  fauction.lookup:
+    description: View the auctions of a player (/ah lookup <player>)
+    default: true
+  fauction.tabcomplete:
+    description: See the list and expire words in the /ah tab completion (everyone can still run them)
+    default: op
   fauction.bypass.spam:
     description: Ignore the anti packet spamming protection
     default: op
@@ -49,6 +56,7 @@ permissions:
       fauction.admin.migrate: true
       fauction.admin.clear.players: true
       fauction.admin.slots: true
+      fauction.tabcomplete: true
   fauction.admin.reload:
     description: Reload the configuration
     default: op

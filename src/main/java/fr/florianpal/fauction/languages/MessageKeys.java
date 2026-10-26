@@ -63,6 +63,12 @@ public enum MessageKeys {
 
     SOUNDS_OFF,
 
+    LOOKUP_NOT_FOUND,
+
+    LOOKUP_EMPTY,
+
+    SELL_INVALID_AMOUNT,
+
     MIGRATE,
 
     DATABASEERROR;

@@ -4,11 +4,14 @@ import fr.florianpal.fauction.FAuction;
 import fr.florianpal.fauction.commands.AuctionCommand;
 import fr.florianpal.fauction.commands.CommandPlaceholders;
 import fr.florianpal.fauction.commands.FAuctionHelp;
+import fr.florianpal.fauction.configurations.CommandsConfig;
+import fr.florianpal.fauction.enums.CommandKey;
 import fr.florianpal.fauction.enums.MigrateVersion;
 import fr.florianpal.fauction.languages.MessageKeys;
 import fr.florianpal.fauction.utils.FormatUtil;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.bukkit.BukkitCommandManager;
 import org.incendo.cloud.bukkit.CloudBukkitCapabilities;
@@ -20,10 +23,17 @@ import org.incendo.cloud.exception.InvalidSyntaxException;
 import org.incendo.cloud.exception.NoPermissionException;
 import org.incendo.cloud.exception.handling.ExceptionContext;
 import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.internal.CommandNode;
+import org.incendo.cloud.permission.Permission;
 import org.incendo.cloud.minecraft.extras.MinecraftExceptionHandler;
 import org.incendo.cloud.minecraft.extras.caption.ComponentCaptionFormatter;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -42,6 +52,14 @@ public class CommandManager {
      * live under {@code acf-core}, and are relocated by the language updater.
      */
     private static final String ERROR_PREFIX = "fauction.error.";
+
+    /**
+     * Who keeps every word of {@code /ah} in their tab completion. Ordinary players only get the
+     * trading words proposed ({@code sell}, {@code search}, {@code lookup}, {@code sounds},
+     * {@code help}) : {@code list} and {@code expire} stay out of their completion — running
+     * them is untouched, see {@link #hideAdminWordsFromCompletion()}.
+     */
+    public static final String FULL_COMPLETION_PERMISSION = "fauction.tabcomplete";
 
     private final FAuction plugin;
 
@@ -98,6 +116,56 @@ public class CommandManager {
      */
     public void register(Object commandContainer) {
         annotationParser.parse(commandContainer);
+        hideAdminWordsFromCompletion();
+    }
+
+    /**
+     * Takes the {@code list} and {@code expire} words out of the completion of ordinary
+     * players. A bare {@code /ah} already opens the market and expired items are one button
+     * away in the gui, so proposing both words only drowns {@code sell} and {@code search} —
+     * the two a player comes for. The {@code admin} word needs no such help : every command
+     * under it already carries an administrator permission, which hides it the same way.
+     * <p>
+     * Only the completion changes. Each node carries, per sender type, the permission Cloud
+     * wants to see before proposing the word — the access metadata Brigadier turns into the
+     * requirement of the literal it sends to the client, and that Cloud's own suggestions check
+     * too. Execution goes by the permission of the command itself ({@code fauction.list},
+     * {@code fauction.expire}), so a player typing {@code /ah expire} in full — because the
+     * login reminder told them to — gets exactly what they got before.
+     */
+    private void hideAdminWordsFromCompletion() {
+        CommandsConfig commandsConfig = plugin.getConfigurationManager().getCommandsConfig();
+
+        CommandNode<CommandSender> root = manager.commandTree().getNamedNode(commandsConfig.primary(CommandKey.ROOT));
+        if (root == null) {
+            return;
+        }
+
+        // The configured names, aliases included : the words are the ones of config.yml, and a
+        // renamed list must hide under its new name too.
+        Set<String> hiddenWords = new HashSet<>();
+        hiddenWords.addAll(commandsConfig.names(CommandKey.LIST));
+        hiddenWords.addAll(commandsConfig.names(CommandKey.EXPIRE));
+
+        hideFromCompletion(root, hiddenWords, Permission.of(FULL_COMPLETION_PERMISSION));
+    }
+
+    /**
+     * The literal children of {@code root} named in {@code literalNames} stop being proposed to
+     * players without {@code permission}. Their commands keep their own permissions and stay
+     * runnable by whoever could run them before.
+     */
+    public static <C> void hideFromCompletion(CommandNode<C> root, Collection<String> literalNames, Permission permission) {
+        for (CommandNode<C> child : root.children()) {
+            if (child.component() == null || !literalNames.contains(child.component().name())) {
+                continue;
+            }
+
+            Map<Type, Permission> access = child.nodeMeta().getOrNull(CommandNode.META_KEY_ACCESS);
+            if (access != null) {
+                access.put(Player.class, permission);
+            }
+        }
     }
 
     /**
@@ -173,6 +241,10 @@ public class CommandManager {
             return error("unknown_migrate_version",
                     "{version}", unknownVersion.getInput(),
                     "{versions}", String.join(", ", MigrateVersion.ids()));
+        }
+
+        if (cause instanceof AuctionCommand.UnknownMaterialException unknownMaterial) {
+            return error("unknown_material", "{material}", unknownMaterial.getInput());
         }
 
         // Anything else (an unknown material, for instance) keeps Cloud's own wording, which names

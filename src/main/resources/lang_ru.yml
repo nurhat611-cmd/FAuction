@@ -15,6 +15,7 @@ fauction:
   clear_players_help_description: "Очистить данные аукциона игроков и счётчики лотов без комиссии"
   slots_info_help_description: "Показать права игрока на слоты и хранение просроченных товаров"
   sounds_help_description: "Включить или выключить свои звуки аукциона"
+  lookup_help_description: "Посмотреть товары игрока на аукционе"
 
   buy_auction_success: "Вы успешно купили {item} за {price}."
   buy_auction_target_success: "Игрок {player} купил ваш предмет {item} за {price}."
@@ -58,12 +59,16 @@ fauction:
   slots_info_storage: "&7Хранение просроченных: &f{days} дн. &8(база {base} + бонус {bonus}: {permissions})"
   sounds_on: "Звуки аукциона включены."
   sounds_off: "Звуки аукциона выключены."
+  lookup_not_found: "&cИгрок &6{player}&c ещё не играл на сервере."
+  lookup_empty: "&7У игрока {player} сейчас нет товаров на аукционе."
+  sell_invalid_amount: "&cНельзя продать {amount} шт.: в руке только {max}."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:
     permission_denied: "&cИзвините, у Вас нет прав для выполнения этой команды."
     invalid_syntax: "&cИспользование: &6{command} {syntax}"
     not_allowed_on_console: "&cЭту команду может использовать только игрок."
+    unknown_material: "&cНеизвестный материал: &6{material}"
     must_be_a_number: "&6{num}&c должно быть числом."
     internal: "&cИзвините, но при выполнении команды произошла ошибка."
     unknown_migrate_version: "&cНеизвестная версия миграции: &6{version}&c. Доступные версии: &6{versions}"

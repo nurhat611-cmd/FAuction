@@ -14,6 +14,7 @@ fauction:
   clear_players_help_description: "Effacer les données d'enchères des joueurs et les compteurs sans commission"
   slots_info_help_description: "Afficher les permissions d'emplacements et de conservation d'un joueur"
   sounds_help_description: "Activer ou couper vos sons d'enchères"
+  lookup_help_description: "Voir les enchères d'un joueur"
   auction_search_help_description: "Rechercher un item"
 
   buy_auction_success: "Vous venez d'acheter l'item {item} pour le prix de {price}."
@@ -59,12 +60,16 @@ fauction:
   slots_info_storage: "&7Conservation des expirés : &f{days} jours &8(base {base} + bonus {bonus} : {permissions})"
   sounds_on: "Les sons des enchères sont activés."
   sounds_off: "Les sons des enchères sont coupés."
+  lookup_not_found: "&cLe joueur &6{player}&c n'a jamais joué ici."
+  lookup_empty: "&7{player} n'a rien en vente pour le moment."
+  sell_invalid_amount: "&cImpossible de vendre {amount} de cet objet : votre main n'en contient que {max}."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:
     permission_denied: "&cVous n'avez pas la permission d'exécuter cette commande !"
     invalid_syntax: "&cSyntaxe invalide ! Usage : &6{command} {syntax}"
     not_allowed_on_console: "&cCette commande ne peut être utilisée que par un joueur."
+    unknown_material: "&cMatériau inconnu : &6{material}"
     must_be_a_number: "&6{num}&c doit être un nombre !"
     internal: "&cUne erreur est survenue lors de l'exécution de cette commande !"
     unknown_migrate_version: "&cVersion de migration inconnue : &6{version}&c. Versions disponibles : &6{versions}"

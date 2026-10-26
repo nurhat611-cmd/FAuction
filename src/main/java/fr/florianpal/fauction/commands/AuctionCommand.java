@@ -24,6 +24,7 @@ import fr.florianpal.fauction.utils.MessageUtil;
 import fr.florianpal.fauction.utils.SerializationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.CommandSender;
@@ -42,8 +43,10 @@ import org.incendo.cloud.context.CommandInput;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.ceil;
@@ -87,6 +90,36 @@ public class AuctionCommand {
     static final String ONLINE_PLAYER_SUGGESTIONS = "fauction:online_players";
 
     static final String SOUND_STATE_SUGGESTIONS = "fauction:sound_states";
+
+    static final String PRICE_SUGGESTIONS = "fauction:prices";
+
+    static final String AMOUNT_SUGGESTIONS = "fauction:amounts";
+
+    static final String MATERIAL_PARSER = "fauction:material";
+
+    static final String MATERIAL_SUGGESTIONS = "fauction:materials";
+
+    /**
+     * The prices tab completion proposes for a sale. Starting points, not a cage : any other
+     * price stays typeable.
+     */
+    static final List<String> PRICE_SUGGESTION_VALUES = List.of("100", "1000", "25000", "50000", "100000", "500000");
+
+    /**
+     * The amounts tab completion proposes for a sale : one item, and the quantities stacks are
+     * usually traded in.
+     */
+    static final List<String> AMOUNT_SUGGESTION_VALUES = List.of("1", "16", "32", "64");
+
+    /**
+     * Every material that can be held as an item, under the lowercase name players type. Sorted
+     * once : the suggestions of {@code /ah search} narrow this list on what is already typed.
+     */
+    static final List<String> MATERIAL_NAMES = Arrays.stream(Material.values())
+            .filter(material -> material.isItem() && !material.isAir())
+            .map(material -> material.name().toLowerCase(Locale.ROOT))
+            .sorted()
+            .toList();
 
     private final FAuction plugin;
 
@@ -184,7 +217,7 @@ public class AuctionCommand {
     @Command(ROOT + SPACE + SEARCH + SPACE + "<material>")
     @Permission("fauction.search")
     @CommandDescription("{@@fauction.auction_search_help_description}")
-    public void onSearch(Player playerSender, Material material) {
+    public void onSearch(Player playerSender, @Argument(value = "material", parserName = MATERIAL_PARSER) Material material) {
 
         if (spamManager.spamTest(playerSender, SpamAction.COMMAND)) {
             return;
@@ -202,10 +235,43 @@ public class AuctionCommand {
         }).execute();
     }
 
-    @Command(ROOT + SPACE + SELL + SPACE + "<priceEntry>")
+    @Command(ROOT + SPACE + "lookup <playerName>")
+    @Permission("fauction.lookup")
+    @CommandDescription("{@@fauction.lookup_help_description}")
+    public void onLookup(Player playerSender, @Argument(value = "playerName", suggestions = ONLINE_PLAYER_SUGGESTIONS) String playerName) {
+
+        if (spamManager.spamTest(playerSender, SpamAction.COMMAND)) {
+            return;
+        }
+
+        // Online first, then the user cache : looking a player up must never block the command
+        // thread on a Mojang query for a name the server has never seen.
+        Player onlineTarget = Bukkit.getPlayerExact(playerName);
+        OfflinePlayer target = onlineTarget != null ? onlineTarget : Bukkit.getOfflinePlayerIfCached(playerName);
+
+        if (target == null) {
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.LOOKUP_NOT_FOUND, "{player}", playerName);
+            return;
+        }
+
+        String targetName = target.getName() != null ? target.getName() : playerName;
+
+        FAuction.newChain(playerSender).asyncFirst(() -> auctionCommandManager.getAuctions(target.getUniqueId())).syncLast(auctions -> {
+            if (auctions.isEmpty()) {
+                MessageUtil.sendMessage(plugin, playerSender, MessageKeys.LOOKUP_EMPTY, "{player}", targetName);
+                return;
+            }
+
+            LookupGui lookupGui = new LookupGui(plugin, playerSender, target.getUniqueId(), auctions, 1, null, null);
+            lookupGui.initialize();
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.AUCTION_OPEN);
+        }).execute();
+    }
+
+    @Command(ROOT + SPACE + SELL + SPACE + "<priceEntry> [amount]")
     @Permission("fauction.sell")
     @CommandDescription("{@@fauction.auction_add_help_description}")
-    public void onAdd(Player playerSender, @Argument(value = "priceEntry", parserName = PRICE_PARSER) double priceEntry) {
+    public void onAdd(Player playerSender, @Argument(value = "priceEntry", parserName = PRICE_PARSER) double priceEntry, @Argument(value = "amount", suggestions = AMOUNT_SUGGESTIONS) Integer amount) {
 
         if (spamManager.spamTest(playerSender, SpamAction.TRANSACTION)) {
             return;
@@ -219,6 +285,20 @@ public class AuctionCommand {
         }
 
         ItemStack itemToSell = playerSender.getInventory().getItemInMainHand().clone();
+
+        // Without an amount the whole stack is sold, as the command has always done. With one,
+        // it has to be a quantity the hand really holds : the price is the price of the lot, so
+        // silently selling fewer items than typed would sell them at the wrong price.
+        int handAmount = itemToSell.getAmount();
+        int sellAmount = amount == null ? handAmount : amount;
+
+        if (sellAmount < 1 || sellAmount > handAmount) {
+            MessageUtil.sendMessage(plugin, playerSender, MessageKeys.SELL_INVALID_AMOUNT, "{amount}", String.valueOf(sellAmount), "{max}", String.valueOf(handAmount));
+            plugin.getClaimManager().release(playerSender.getUniqueId(), saleClaim);
+            return;
+        }
+
+        itemToSell.setAmount(sellAmount);
 
         double price = FormatUtil.applyMoneyFormat(priceEntry, df, globalConfig.isFeatureFlippingMoneyFormat());
 
@@ -247,7 +327,7 @@ public class AuctionCommand {
 
             // The hand may have changed during the round trip, only the checked item can be sold.
             ItemStack inHand = playerSender.getInventory().getItemInMainHand();
-            if (!inHand.isSimilar(itemToSell) || inHand.getAmount() != itemToSell.getAmount()) {
+            if (!inHand.isSimilar(itemToSell) || inHand.getAmount() != handAmount) {
                 return;
             }
 
@@ -282,8 +362,12 @@ public class AuctionCommand {
             }
 
             // Taken and resynchronised right away, so the client cannot keep a ghost item and send
-            // it back to the server.
-            playerSender.getInventory().setItemInMainHand(null);
+            // it back to the server. A partial sale only draws the sold amount from the stack.
+            if (sellAmount >= inHand.getAmount()) {
+                playerSender.getInventory().setItemInMainHand(null);
+            } else {
+                inHand.setAmount(inHand.getAmount() - sellAmount);
+            }
             playerSender.updateInventory();
             itemTaken.set(true);
 
@@ -703,7 +787,7 @@ public class AuctionCommand {
      * back unchanged when it cannot parse it. {@code Infinity} only ever hit a maximum price when one
      * happened to be configured. Neither can reach the business code any more.
      */
-    @Parser(name = PRICE_PARSER)
+    @Parser(name = PRICE_PARSER, suggestions = PRICE_SUGGESTIONS)
     public double parsePrice(CommandInput input) {
         String token = input.readString();
 
@@ -738,6 +822,83 @@ public class AuctionCommand {
     @Suggestions(MIGRATE_VERSION_SUGGESTIONS)
     public List<String> migrateVersionSuggestions() {
         return MigrateVersion.ids();
+    }
+
+    @Suggestions(PRICE_SUGGESTIONS)
+    public List<String> priceSuggestions() {
+        return PRICE_SUGGESTION_VALUES;
+    }
+
+    @Suggestions(AMOUNT_SUGGESTIONS)
+    public List<String> amountSuggestions() {
+        return AMOUNT_SUGGESTION_VALUES;
+    }
+
+    /**
+     * The material of a search, read the way players type it : any case, with or without the
+     * {@code minecraft:} namespace. The parser Cloud registers by default wants the exact name
+     * of the enum, so {@code /ah search diamond_sword} failed where {@code DIAMOND_SWORD}
+     * worked — and Minecraft players type items in lowercase everywhere else.
+     */
+    @Parser(name = MATERIAL_PARSER, suggestions = MATERIAL_SUGGESTIONS)
+    public Material parseMaterial(CommandInput input) {
+        String token = input.readString();
+        return parseMaterialName(token).orElseThrow(() -> new UnknownMaterialException(token));
+    }
+
+    static Optional<Material> parseMaterialName(String raw) {
+        if (raw == null) {
+            return Optional.empty();
+        }
+
+        String name = raw.trim().toLowerCase(Locale.ROOT);
+        if (name.startsWith("minecraft:")) {
+            name = name.substring("minecraft:".length());
+        }
+        name = name.replace(' ', '_').replace('-', '_');
+        if (name.isEmpty()) {
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(Material.valueOf(name.toUpperCase(Locale.ROOT)));
+        } catch (IllegalArgumentException unknownEnumName) {
+            return Optional.ofNullable(Material.matchMaterial(name));
+        }
+    }
+
+    /**
+     * The materials still matching what the player has typed. Left to itself, the completion
+     * proposes every material of the game and filters them on a case-sensitive prefix ;
+     * narrowing the list here is what makes {@code dia} — or {@code DIA} — land on the handful
+     * of materials the player is actually aiming at.
+     */
+    @Suggestions(MATERIAL_SUGGESTIONS)
+    public List<String> materialSuggestions(CommandInput input) {
+        String remaining = input.remainingInput();
+        return materialSuggestionsFor(remaining.substring(remaining.lastIndexOf(' ') + 1));
+    }
+
+    static List<String> materialSuggestionsFor(String typed) {
+        String fragment = typed == null ? "" : typed.trim().toLowerCase(Locale.ROOT);
+        if (fragment.startsWith("minecraft:")) {
+            fragment = fragment.substring("minecraft:".length());
+        }
+        fragment = fragment.replace('-', '_');
+
+        // Prefix matches first — what the player is most likely typing — then the names merely
+        // containing the fragment, for the {@code sword} typed in search of every sword.
+        List<String> byPrefix = new ArrayList<>();
+        List<String> byFragment = new ArrayList<>();
+        for (String materialName : MATERIAL_NAMES) {
+            if (materialName.startsWith(fragment)) {
+                byPrefix.add(materialName);
+            } else if (materialName.contains(fragment)) {
+                byFragment.add(materialName);
+            }
+        }
+        byPrefix.addAll(byFragment);
+        return byPrefix;
     }
 
     /**
@@ -781,6 +942,20 @@ public class AuctionCommand {
 
         UnknownMigrateVersionException(String input) {
             super("Unknown migration version : " + input);
+            this.input = input;
+        }
+
+        public String getInput() {
+            return input;
+        }
+    }
+
+    public static final class UnknownMaterialException extends IllegalArgumentException {
+
+        private final transient String input;
+
+        UnknownMaterialException(String input) {
+            super("Unknown material : " + input);
             this.input = input;
         }
 

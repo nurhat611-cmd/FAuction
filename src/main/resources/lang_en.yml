@@ -15,6 +15,7 @@ fauction:
   clear_players_help_description: "Wipe the player auction data and the free-commission counters"
   slots_info_help_description: "Show the auction slot and expired-storage permissions of a player"
   sounds_help_description: "Turn your auction sounds on or off"
+  lookup_help_description: "View the auctions of a player"
 
   buy_auction_success: "You just bought {item} for {price}."
   buy_auction_target_success: "The player {player} bought your item {item} at the price of {price}."
@@ -58,12 +59,16 @@ fauction:
   slots_info_storage: "&7Expired-item storage: &f{days} days &8(base {base} + bonus {bonus}: {permissions})"
   sounds_on: "Auction sounds are now on."
   sounds_off: "Auction sounds are now off."
+  lookup_not_found: "&cPlayer &6{player}&c has never played here."
+  lookup_empty: "&7{player} has nothing for sale right now."
+  sell_invalid_amount: "&cYou cannot sell {amount} of this item: your hand only holds {max}."
 
   # Messages of the command framework itself (permissions, syntax, parsing).
   error:
     permission_denied: "&cI'm sorry, but you do not have permission to perform this command."
     invalid_syntax: "&cUsage: &6{command} {syntax}"
     not_allowed_on_console: "&cThis command can only be used by a player."
+    unknown_material: "&cUnknown material: &6{material}"
     must_be_a_number: "&6{num}&c must be a number."
     internal: "&cI'm sorry, but there was an error performing this command."
     unknown_migrate_version: "&cUnknown migration version &6{version}&c. Available versions: &6{versions}"

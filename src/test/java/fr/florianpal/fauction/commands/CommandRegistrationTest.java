@@ -78,7 +78,8 @@ class CommandRegistrationTest extends FAuctionTestBase {
         Set<String> paths = paths(manager);
         assertTrue(paths.contains("ah"), paths.toString());
         assertTrue(paths.contains("ah list"), paths.toString());
-        assertTrue(paths.contains("ah sell priceEntry"), paths.toString());
+        assertTrue(paths.contains("ah sell priceEntry amount"), paths.toString());
+        assertTrue(paths.contains("ah lookup playerName"), paths.toString());
         assertTrue(paths.contains("ah search material"), paths.toString());
         assertTrue(paths.contains("ah expire"), paths.toString());
         assertTrue(paths.contains("ah help query"), paths.toString());
@@ -106,12 +107,12 @@ class CommandRegistrationTest extends FAuctionTestBase {
         assertEquals(Set.of("market"), Set.copyOf(manager.rootCommands()));
 
         Set<String> paths = paths(manager);
-        assertTrue(paths.contains("market vendre priceEntry"), paths.toString());
+        assertTrue(paths.contains("market vendre priceEntry amount"), paths.toString());
         assertTrue(paths.contains("market gestion reload"), paths.toString());
 
         // The renamed ones are gone, the ones left alone are still there.
-        assertFalse(paths.contains("ah sell priceEntry"), paths.toString());
-        assertFalse(paths.contains("market sell priceEntry"), paths.toString());
+        assertFalse(paths.contains("ah sell priceEntry amount"), paths.toString());
+        assertFalse(paths.contains("market sell priceEntry amount"), paths.toString());
         assertTrue(paths.contains("market list"), paths.toString());
 
         // An alias answers too, and the main name is the first one of the list.
@@ -129,7 +130,7 @@ class CommandRegistrationTest extends FAuctionTestBase {
                 """);
 
         String sellPermission = manager.commands().stream()
-                .filter(command -> path(command.components()).equals("market vendre priceEntry"))
+                .filter(command -> path(command.components()).equals("market vendre priceEntry amount"))
                 .map(command -> command.commandPermission().permissionString())
                 .findFirst()
                 .orElseThrow();
