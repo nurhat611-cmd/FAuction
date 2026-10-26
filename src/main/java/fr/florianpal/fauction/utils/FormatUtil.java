@@ -43,14 +43,25 @@ public class FormatUtil {
     }
 
     /**
+     * A tag {@link TextUtil} actually reads. {@code <price>} of the usage lines is not one, so
+     * those texts keep the historical path — and its exact spelling, trailing {@code §r} and
+     * all — while a text carrying a real tag goes through MiniMessage.
+     */
+    private static final Pattern MINI_MESSAGE_TAG = Pattern.compile(
+            "</?(black|dark_blue|dark_green|dark_aqua|dark_red|dark_purple|gold|gray|dark_gray|blue"
+                    + "|green|aqua|red|light_purple|yellow|white|bold|italic|underlined|strikethrough"
+                    + "|obfuscated|reset|gradient|rainbow|transition|newline|color|#[0-9a-fA-F]{6})(?=[>:\\s])",
+            Pattern.CASE_INSENSITIVE);
+
+    /**
      * A text of the plugin as a legacy string — the form item names, lore and inventory titles
-     * still travel in. A text without a single {@code <} cannot hold a MiniMessage tag and
-     * takes the historical path below untouched, byte for byte ; one that does is read by
-     * {@link TextUtil} and spelled back in section codes, which is what lets a configuration
-     * write {@code <gradient:red:gold>} where it used to write {@code &c}.
+     * still travel in. A text without a MiniMessage tag takes the historical path below
+     * untouched, byte for byte ; one that carries tags is read by {@link TextUtil} and spelled
+     * back in section codes, which is what lets a configuration write
+     * {@code <gradient:red:gold>} where it used to write {@code &c}.
      */
     public static String format(String msg) {
-        if (msg != null && msg.indexOf('<') >= 0) {
+        if (msg != null && MINI_MESSAGE_TAG.matcher(msg).find()) {
             return TextUtil.toLegacy(msg);
         }
         return legacyFormat(msg);
