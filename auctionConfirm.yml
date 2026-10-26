@@ -1,0 +1,156 @@
+#=====================================================================
+# Версия GUI подтверждения
+# =====================================================================
+version: 1
+
+gui:
+  size: 27                           # Размер 3×9 (27 слотов)
+  type: CHEST
+  name: "Подтверждение покупки"       # Заголовок окна
+  title-true: "&aПодтвердить покупку &f[&r{Item}&r&f]"   # При подтверждении
+  title-false: "&cОтменить покупку"                     # При отмене
+  hideFlag: false
+  description:
+    - "&dПродавец: &6{OwnerName}"
+    - "&dЦена: &e{Price}⛁"
+
+  auction:
+    title: "&eПредмет: &6{ItemName}"
+    replaceTitle: false
+    description:
+      - "&dПродавец: &6{OwnerName}"
+      - "&dЦена: &e{Price}⛁"
+      - "&dОсталось: &7{RemainingTime}"
+      - "&dОписание:"
+      - "{lore}"
+block:
+  '0':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '1':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '2':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '3':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '4':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '5':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '6':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '7':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '8':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '9':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '10':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '11':
+    utility: confirm
+    material: RED_WOOL
+    value: false
+  '12':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '13':
+    utility: auction
+  '14':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '15':
+    utility: confirm
+    material: GREEN_WOOL
+    value: true
+  '16':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '17':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '18':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '19':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '20':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '21':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '22':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '23':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '24':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '25':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
+  '26':
+    utility: barrier
+    material: GRAY_STAINED_GLASS_PANE
+    title: ' '
+    description: {}
