@@ -1,0 +1,88 @@
+name: FAuction
+main: fr.florianpal.fauction.FAuction
+author: florianpal
+version: 2.3.0
+api-version: '1.21'
+folia-supported: true
+softdepend: [Vault, LuckPerms, PlaceholderAPI]
+permissions:
+  fauction.user:
+    description: Parent, grants every player permission
+    default: true
+    children:
+      fauction.list: true
+      fauction.sell: true
+      fauction.expire: true
+      fauction.search: true
+  fauction.list:
+    description: Open the auction gui
+    default: true
+  fauction.sell:
+    description: Sell an item on the auction house
+    default: true
+  fauction.expire:
+    description: Open the expired items gui
+    default: true
+  fauction.search:
+    description: Search the auctions by material
+    default: true
+  fauction.bypass.spam:
+    description: Ignore the anti packet spamming protection
+    default: op
+  fauction.mod.cancel:
+    description: Cancel the auction of another player
+    default: op
+  fauction.admin:
+    description: Parent, grants every administration permission
+    default: op
+    children:
+      fauction.admin.reload: true
+      fauction.admin.purge.all: true
+      fauction.admin.purge.auction: true
+      fauction.admin.purge.expire: true
+      fauction.admin.purge.hictoric: true
+      fauction.admin.transfertBddToPaper: true
+      fauction.admin.migrate: true
+      fauction.admin.clear.players: true
+  fauction.admin.reload:
+    description: Reload the configuration
+    default: op
+  fauction.admin.purge.all:
+    description: Purge every data
+    default: op
+  fauction.admin.purge.auction:
+    description: Purge the active auctions
+    default: op
+  fauction.admin.purge.expire:
+    description: Purge the expired items
+    default: op
+  fauction.admin.purge.hictoric:
+    description: Purge the transaction history
+    default: op
+  fauction.admin.transfertBddToPaper:
+    description: Migrate the serialization format of the database
+    default: op
+  fauction.admin.migrate:
+    description: Run the migration of a given version
+    default: op
+  fauction.admin.clear.players:
+    description: Wipe the player auction data and the free-commission counters (/ah clear data players)
+    default: op
+  fauction.nocommission.3:
+    description: List 3 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.5:
+    description: List 5 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.7:
+    description: List 7 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.10:
+    description: List 10 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.16:
+    description: List 16 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false
+  fauction.nocommission.25:
+    description: List 25 lots without the auction commission (highest held tier wins, see commission in config.yml)
+    default: false

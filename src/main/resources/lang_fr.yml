@@ -1,0 +1,76 @@
+# Language file of FAuction. "version" is managed by the plugin : leave it alone,
+# it is what lets your own texts be kept when new keys are added.
+version: 3
+fauction:
+  help_description: "Affiche cette aide."
+  auction_list_help_description: "Pour ouvrir l'hôtel des ventes"
+  auction_sell_help_description: "Pour vendre le stack d'items dans votre main"
+  expire_add_help_description: "Pour voir vos ventes expirées"
+  auction_add_help_description: "Ajouter une nouvelle vente"
+  reload_help_description: "Permet de recharger la configuration du plugin."
+  transfert_bdd_help_description: "Transfert des données de la bdd vers spigot->paper ou paper->spigot"
+  clear_cache_help_description: "Pour vider le cache"
+  migrate_help_description: "Faire une migration vers une autre version."
+  clear_players_help_description: "Effacer les données d'enchères des joueurs et les compteurs sans commission"
+  auction_search_help_description: "Rechercher un item"
+
+  buy_auction_success: "Vous venez d'acheter l'item {item} pour le prix de {price}."
+  buy_auction_target_success: "Le joueur {player} a acheté l'item {item} au prix de {price}."
+  no_auction: "Il n'y a actuellement aucune vente active."
+  auction_open: "Vous avez ouvert l'hotel des ventes."
+  auction_add_success: "Vous venez d'ajouter la vente de l'item {item} au prix de {price}."
+  remove_auction_success: "Vous avez bien annulé votre vente de l'item {item}."
+  buy_your_item: "Vous ne pouvez pas acheter votre propre item."
+  item_air: "Vous n'avez actuellement aucun item dans votre main."
+  search_air: "Vous ne pouvez pas rechercher de l'air."
+  no_have_money: "Vous n'avez pas assez d'argent pour effectuer cet achat."
+  auction_expire: "Un de vos item mis en vente dans le ah vient d'expirer."
+  auction_already_sell: "L'item que vous voulez acheter est déjà vendu."
+  negative_price: "Vous ne pouvez pas vendre un item avec un prix négatif."
+  max_auction: "Vous avez atteint le maximum de ventes possible pour votre grade."
+  auction_expire_drop: "Une de vos vente a expiré et vous n'avez pas d'espace dans votre inventaire. Donc elle a été déposé au sol."
+  buy_auction_cancelled: "Vous avez annulé votre achat."
+  min_price: "Votre prix est en dessous du prix minimum de {minPrice}."
+  max_price: "Votre prix est au dessus du prix maximum de {maxPrice}."
+  auction_reload: "La configuration du plugin a été recharger."
+  commands_restart_required: "&eLes noms des commandes ont changé : redémarrez le serveur pour qu'ils prennent effet."
+  spam: "&cStop! Vous tentez d'effectuer trop d'actions dans un délai très court! Veuillez patienter quelques secondes..."
+  clear_cache: "Vous avez vidé le cache."
+
+  remove_expire_success: "Vous avez récupéré un de vos items expiré."
+  item_blacklist: "Vous ne pouvez pas vendre cet item !"
+
+  transfert_bdd: "Transfert de la base de données terminée."
+
+  migrate: "Vous avez effectué une migration vers la version {version}."
+
+  auction_purge: "Vous avez effacé toutes les données."
+  player_data_clear: "Toutes les données d'enchères des joueurs et les compteurs de mises en vente sans commission ont été effacés."
+  commission_paid: "Commission de l'hôtel des ventes prélevée : {fee} ({percent}%)."
+  commission_free: "Mis en vente sans commission. Mises en vente gratuites restantes : {remaining}."
+  commission_not_enough: "Vous n'avez pas assez d'argent pour payer la commission de {fee} ({percent}%)."
+
+  # Messages of the command framework itself (permissions, syntax, parsing).
+  error:
+    permission_denied: "&cVous n'avez pas la permission d'exécuter cette commande !"
+    invalid_syntax: "&cSyntaxe invalide ! Usage : &6{command} {syntax}"
+    not_allowed_on_console: "&cCette commande ne peut être utilisée que par un joueur."
+    must_be_a_number: "&6{num}&c doit être un nombre !"
+    internal: "&cUne erreur est survenue lors de l'exécution de cette commande !"
+    unknown_migrate_version: "&cVersion de migration inconnue : &6{version}&c. Versions disponibles : &6{versions}"
+
+  # Texts of the generated help of /ah help.
+  help:
+    help: "Aide"
+    command: "Commande"
+    description: "Description"
+    no_description: "Aucune description"
+    arguments: "Arguments"
+    optional: "Optionnel"
+    showing_results_for_query: "Résultats de la recherche pour"
+    no_results_for_query: "Aucun résultat pour cette recherche"
+    available_commands: "Commandes disponibles"
+    click_to_show_help: "Cliquez pour afficher l'aide de cette commande"
+    page_out_of_range: "Erreur : la page <page> n'existe pas. Elle doit être comprise entre 1 et <max_pages>."
+    click_for_next_page: "Cliquez pour la page suivante"
+    click_for_previous_page: "Cliquez pour la page précédente"

@@ -1,0 +1,93 @@
+version: 13
+lang: "en"
+
+currencyUse: VAULT # VAULT, EXPERIENCE, LEVEL
+
+# Auction commission, charged to the seller when a lot is listed with /ah sell.
+# - percent : part of the price taken as commission (7.0 == 7%).
+# - The permissions fauction.nocommission.3 / .5 / .7 / .10 / .16 / .25 let a player list that
+#   many lots WITHOUT paying it. With several of them, the highest tier wins (they do not add up).
+# - free-quota-mode LIFETIME : the quota is spent for good, lot after lot ; the per-player counter
+#   only goes back to zero on a wipe (/ah clear data players).
+# - free-quota-mode ACTIVE : only the free lots currently on the market count ; a free slot comes
+#   back as soon as its lot is sold, cancelled or expired.
+commission:
+  enabled: true
+  percent: 7.0
+  free-quota-mode: LIFETIME # LIFETIME or ACTIVE
+
+defaultGui: AUCTION # The default gui open with /ah command
+
+# Names and aliases of the commands.
+# The FIRST value of a list is the main name, the one shown in /ah help and in the error messages ;
+# the next ones are aliases. Ex : sell: ["vendre", "sell"] makes /ah vendre 10 and /ah sell 10 work,
+# and the help shows "vendre".
+# - The permissions never change : renaming "sell" keeps fauction.sell.
+# - A name must be a single word, without any of | < > [ ] { } : / \ $ " '
+# - An unusable entry, or two subcommands sharing a name, is ignored and the defaults are used
+#   instead : look at the server console, it says exactly what was refused.
+# - The commands are registered when the server starts : a change here needs a full restart,
+#   /ah admin reload is not enough.
+commands:
+  root: ["ah", "hdv"]
+  list: ["list"]
+  search: ["search"]
+  sell: ["sell"]
+  expire: ["expire"]
+  help: ["help"]
+  admin: ["admin"]
+
+feature-flipping:
+  item-expiration: true
+  cache-update: true
+  money-format: false
+  duplication-hashcode-control: false
+
+decimalFormat: "0.00"
+
+update-checker:
+  enabled: true # Check GitHub at startup and on reload for a new release and warn the console
+
+orderBy: "ASC" # ASC or DESC / ASC : More recent to older / DESC : Older to more recent || Deprecated use sort.yml
+dateFormat: "dd/MM/yyyy ':' HH:mm"
+remainingDateFormat: "MMM ddd HHh mmm sss"
+securityForSpammingPacket: true # Anti packet spamming protection. Players with the permission fauction.bypass.spam are ignored
+anti-spam: # Each action type has its own budget : "burst" actions are allowed in a row, then "perSecond" actions per second
+  messageCooldown: 3000 # Minimum delay in ms between two warning messages sent to the same player
+  logThreshold: 25 # Number of actions blocked in a row before warning the console. 0 to disable the logs
+  interact: # Click on an item in a gui
+    burst: 8
+    perSecond: 4
+  command: # /ah, /ah search
+    burst: 6
+    perSecond: 2
+  transaction: # Purchase confirmation, /ah sell
+    burst: 4
+    perSecond: 2
+onBuy:
+  sendCommand: # Command sends if item is buying
+    use: false
+    command: ""
+expiration:
+  time: 3600 #In seconds 3600 seconds == 1 Hour
+  checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
+currencyCheck:
+  time: 3600 #In seconds 3600 seconds == 1 Hour
+  checkEvery: 72000 #In ticks 72000 ticks == 1 Hour
+
+cacheUpdate: 72000 #In ticks 72000 ticks == 1 Hour
+
+limitations-use-meta-luckperms: false
+limitations: # Number of auction per rank
+  default: 5
+min-price-default:
+  enable: false
+  value: 0
+max-price-default:
+  enable: false
+  value: 100000000
+min-price: # Min price per item. Ex : 1 CobbleStone at 0.5. Set {} to disable it
+  COBBLESTONE: 0.5
+max-price: # Max price per item. Ex : 1 CobbleStone at 0.5. Set {} to disable it
+  COBBLESTONE: 5
+item-blacklist: []

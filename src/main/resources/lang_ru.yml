@@ -1,0 +1,75 @@
+# Language file of FAuction. "version" is managed by the plugin : leave it alone,
+# it is what lets your own texts be kept when new keys are added.
+version: 3
+fauction:
+  help_description: "Показывает справку."
+  auction_list_help_description: "Открыть аукцион"
+  auction_sell_help_description: "Продать стак предметов из вашей руки"
+  expire_add_help_description: "Продать стак предметов из вашей руки"
+  auction_add_help_description: "Добавить новый предмет"
+  reload_help_description: "Перезагрузить конфигурацию плагина."
+  transfert_bdd_help_description: "Перенести данные БД из Spigot в Paper или Paper в Spigot"
+  clear_cache_help_description: "Очистить кэш"
+  auction_search_help_description: "Поиск предмета"
+  migrate_help_description: "Мигрировать на другую версию."
+  clear_players_help_description: "Очистить данные аукциона игроков и счётчики лотов без комиссии"
+
+  buy_auction_success: "Вы успешно купили {item} за {price}."
+  buy_auction_target_success: "Игрок {player} купил ваш предмет {item} за {price}."
+  no_auction: "В настоящее время нет активных предметов на аукционе."
+  auction_open: "Вы открыли аукцион."
+  auction_add_success: "Вы добавили {item} за {price} на аукцион."
+  remove_auction_success: "Вы сняли {item} с аукциона."
+  buy_your_item: "Вы не можете купить свой собственный предмет."
+  item_air: "У вас нет предмета в руке."
+  search_air: "Нельзя искать воздух."
+  no_have_money: "У вас недостаточно денег для совершения покупки."
+  auction_expire: "Срок действия одного из ваших предметов на аукционе истек."
+  auction_already_sell: "Предмет, который вы хотите купить, уже продан."
+  negative_price: "Нельзя продать предмет с отрицательной ценой."
+  max_auction: "Вы достигли максимального количества предметов на аукционе для вашей группы."
+  auction_expire_drop: "Срок действия одного из ваших предметов истек, и в инвентаре нет места. Предмет был выброшен на землю."
+  buy_auction_cancelled: "Вы отменили покупку."
+  min_price: "Ваша цена ниже минимальной цены {minPrice}."
+  max_price: "Ваша цена выше максимальной цены {maxPrice}."
+  auction_reload: "Конфигурация плагина была перезагружена."
+  commands_restart_required: "&eИмена команд изменились : перезапустите сервер, чтобы они заработали."
+  spam: "&cСлишком много действий за короткое время! Подождите несколько секунд..."
+  clear_cache: "Вы очистили кэш."
+
+  migrate: "Вы выполнили миграцию на версию {version}."
+
+  remove_expire_success: "Вы забрали один из просроченных предметов."
+  item_blacklist: "Этот предмет нельзя продать!"
+
+  transfert_bdd: "Перенос данных базы данных завершен."
+  auction_purge: "Все данные были удалены."
+  player_data_clear: "Все данные аукциона игроков и счётчики лотов без комиссии были очищены."
+  commission_paid: "Списана комиссия аукциона: {fee} ({percent}%)."
+  commission_free: "Лот выставлен без комиссии. Осталось лотов без комиссии: {remaining}."
+  commission_not_enough: "У вас недостаточно денег для оплаты комиссии аукциона: {fee} ({percent}%)."
+
+  # Messages of the command framework itself (permissions, syntax, parsing).
+  error:
+    permission_denied: "&cИзвините, у Вас нет прав для выполнения этой команды."
+    invalid_syntax: "&cИспользование: &6{command} {syntax}"
+    not_allowed_on_console: "&cЭту команду может использовать только игрок."
+    must_be_a_number: "&6{num}&c должно быть числом."
+    internal: "&cИзвините, но при выполнении команды произошла ошибка."
+    unknown_migrate_version: "&cНеизвестная версия миграции: &6{version}&c. Доступные версии: &6{versions}"
+
+  # Texts of the generated help of /ah help.
+  help:
+    help: "Справка"
+    command: "Команда"
+    description: "Описание"
+    no_description: "Нет описания"
+    arguments: "Аргументы"
+    optional: "Необязательный"
+    showing_results_for_query: "Результаты поиска по запросу"
+    no_results_for_query: "Нет результатов по запросу"
+    available_commands: "Доступные команды"
+    click_to_show_help: "Нажмите, чтобы показать справку по этой команде"
+    page_out_of_range: "Ошибка: страница <page> вне диапазона. Допустимы страницы от 1 до <max_pages>."
+    click_for_next_page: "Нажмите для перехода на следующую страницу"
+    click_for_previous_page: "Нажмите для перехода на предыдущую страницу"
